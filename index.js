@@ -12,13 +12,14 @@ module.exports = {
         "sourceType": "module"
     },
     "plugins": [
-        "unicorn",
-		"promise",
-		"no-eslint-disable",
-		"jsdoc",
+		"belgradian",
 		"chai-expect",
+		"jsdoc",
 		"mocha",
-		"tailwindcss"
+		"no-eslint-disable",
+		"promise",
+		"tailwindcss",
+		"unicorn"
 	],
 	"globals": {
         "chrome": "readonly",
@@ -36,6 +37,7 @@ module.exports = {
 	},
 	"ignorePatterns": ["/tools", "/build", "/lib", "/rollup.config.*.js", "/src/_data/eleventyComputed.js", "**/external/*"],
     "rules": {
+		"belgradian/member-prefix-rule": "error",
 		"tailwindcss/classnames-order": "warn",
     	"tailwindcss/no-custom-classname": "warn",
     	"tailwindcss/no-contradicting-classname": "error",
@@ -140,7 +142,7 @@ module.exports = {
         "block-spacing": "error",
         "brace-style": ["error", "allman", { "allowSingleLine": true }],
         "callback-return": "error",
-        "camelcase": "error",
+        "camelcase": "off",
         "capitalized-comments": "off",
         "class-methods-use-this": "error",
         "comma-dangle": "error",
