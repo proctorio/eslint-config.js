@@ -11,7 +11,7 @@
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"author": "Proctorio",
-	"license": "UNLICENSED",
+	"license": "Unlicense",
 	"peerDependencies": {
 		"eslint": "7.32.0",
 		"eslint-plugin-chai-expect": "2.2.0",
