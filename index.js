@@ -31,7 +31,9 @@ module.exports = {
 		"jsdoc": {
 			"mode":"closure",
 			"preferredTypes": {
-				object: "Object"
+				object: "Object",
+				"*": false,
+				"any": false
 			}
 		}
 	},
