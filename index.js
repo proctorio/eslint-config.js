@@ -22,7 +22,8 @@ module.exports = {
 		"unicorn"
 	],
 	"globals": {
-        "chrome": "readonly",
+        "globalThis": "readonly",
+		"chrome": "readonly",
         "browser": "readonly",
 		"expect": "readonly",
 		"should": "readonly"
