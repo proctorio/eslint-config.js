@@ -149,7 +149,7 @@ module.exports = {
         "capitalized-comments": "off",
         "class-methods-use-this": "error",
         "comma-dangle": "error",
-        "comma-spacing": "off",
+        "comma-spacing": [2, { before: false, after: true }],
         "comma-style": [
             "error",
             "last"
@@ -406,7 +406,7 @@ module.exports = {
             "error",
             "never"
         ],
-        "space-infix-ops": "off",
+        "space-infix-ops": "error",
         "space-unary-ops": "error",
         "spaced-comment": ["error", "always"],
         "strict": "off",
