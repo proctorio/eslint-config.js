@@ -101,7 +101,7 @@ module.exports = {
         "unicorn/prefer-text-content": "error",
         "unicorn/prefer-type-error": "error",
         "unicorn/no-fn-reference-in-iterator": "off",
-        "unicorn/import-index": "error",
+        "unicorn/import-index": ["error", {"ignoreImports": true}],
         "unicorn/new-for-builtins": "error",
         "unicorn/regex-shorthand": "error",
         "unicorn/prefer-spread": "error",
