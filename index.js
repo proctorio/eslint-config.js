@@ -48,7 +48,6 @@ module.exports = {
         "jsdoc/check-param-names": "error",
         "jsdoc/check-tag-names": "error",
         "jsdoc/check-types": "error",
-        "jsdoc/newline-after-description": ["error", "never"],
         "jsdoc/no-undefined-types": "error",
         "jsdoc/require-description": ["error", {"descriptionStyle": "tag"}],
         "jsdoc/require-description-complete-sentence": "error",
