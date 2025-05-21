@@ -18,7 +18,6 @@ module.exports = {
 		"mocha",
 		"no-eslint-disable",
 		"promise",
-		"tailwindcss",
 		"unicorn"
 	],
 	"globals": {
@@ -41,9 +40,6 @@ module.exports = {
 	"ignorePatterns": ["/tools", "/build", "/lib", "/rollup.config.*.js", "/src/_data/eleventyComputed.js", "**/external/*"],
     "rules": {
 		"belgradian/member-prefix-rule": "error",
-		"tailwindcss/classnames-order": "warn",
-    	"tailwindcss/no-custom-classname": "warn",
-    	"tailwindcss/no-contradicting-classname": "error",
         "jsdoc/check-examples": "off",
         "jsdoc/check-param-names": "error",
         "jsdoc/check-tag-names": "error",
