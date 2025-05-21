@@ -7,5 +7,4 @@ npm install --save-dev \
 	eslint-plugin-mocha@10.2.0 \
 	eslint-plugin-no-eslint-disable@1.0.1 \
 	eslint-plugin-promise@6.1.1 \
-	eslint-plugin-tailwindcss@3.13.0 \
 	eslint-plugin-unicorn@49.0.0
