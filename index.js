@@ -13,7 +13,6 @@ module.exports = {
     },
     "plugins": [
 		"belgradian",
-		"chai-expect",
 		"jsdoc",
 		"mocha",
 		"no-eslint-disable",
@@ -475,8 +474,6 @@ module.exports = {
 					"varsIgnorePattern": "should|expect"
 				}
 			],
-			"chai-expect/missing-assertion": "error",
-			"chai-expect/terminating-properties": "error",
 			"mocha/no-exclusive-tests": "error",
 			"mocha/no-skipped-tests": "error",
 			"mocha/no-pending-tests": "error",

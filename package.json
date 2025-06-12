@@ -1,6 +1,6 @@
 {
 	"name": "@proctorio/eslint-config",
-	"version": "2.5.0",
+	"version": "2.6.0",
 	"description": "This package provides Proctorio's .eslintrc as an extensible shared config.",
 	"main": "index.js",
 	"repository": {
@@ -13,13 +13,12 @@
 	"author": "Proctorio",
 	"license": "Unlicense",
 	"peerDependencies": {
-		"eslint": "8.52.0",
+		"eslint": "9.27.0",
 		"eslint-plugin-belgradian": "2.4.3",
-		"eslint-plugin-chai-expect": "3.0.0",
-		"eslint-plugin-jsdoc": "46.8.2",
-		"eslint-plugin-mocha": "10.2.0",
-		"eslint-plugin-no-eslint-disable": "1.0.1",
-		"eslint-plugin-promise": "6.1.1",
-		"eslint-plugin-unicorn": "49.0.0"
+		"eslint-plugin-jsdoc": "50.6.17",
+		"eslint-plugin-mocha": "11.0.0",
+		"eslint-plugin-promise": "7.2.1",
+		"eslint-plugin-unicorn": "59.0.1",
+		"eslint-plugin-no-eslint-disable": "1.0.1"
 	}
 }
