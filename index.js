@@ -1,43 +1,68 @@
-module.exports = {
-	"env": {
-		"webextensions": true,
-		"browser": true,
-		"mocha": true,
-		"node": true,
-		"es6": true
-    },
-    "extends": "eslint:recommended",
-    "parserOptions": {
-        "ecmaVersion": 2020,
-        "sourceType": "module"
-    },
-    "plugins": [
-		"belgradian",
-		"jsdoc",
-		"mocha",
-		"no-eslint-disable",
-		"promise",
-		"unicorn"
-	],
-	"globals": {
-        "globalThis": "readonly",
-		"chrome": "readonly",
-        "browser": "readonly",
-		"expect": "readonly",
-		"should": "readonly"
-    },
-	"settings": {
-		"jsdoc": {
-			"mode":"closure",
-			"preferredTypes": {
-				object: "Object",
-				"*": false,
-				"any": false
-			}
-		}
+/**
+ * ESLint configuration (Flat Config format for ESLint v9+).
+ * @type {import("eslint").Linter.Config}
+ */
+
+import belgradian from "eslint-plugin-belgradian";
+import jsdoc from "eslint-plugin-jsdoc";
+import { rules as noEslintDisableRules } from "eslint-plugin-no-eslint-disable";
+import promise from "eslint-plugin-promise";
+import unicorn from "eslint-plugin-unicorn";
+import js from "@eslint/js";
+import globals from "globals";
+
+export default [
+	// Global ignores
+	{
+		ignores: [
+			"**/tools/**",
+			"**/build/**",
+			"**/lib/**",
+			"**/rollup.config.*.js",
+			"**/src/_data/eleventyComputed.js",
+			"**/external/**"
+		]
 	},
-	"ignorePatterns": ["/tools", "/build", "/lib", "/rollup.config.*.js", "/src/_data/eleventyComputed.js", "**/external/*"],
-    "rules": {
+
+	// Base recommended rules
+	js.configs.recommended,
+
+	// Main configuration
+	{
+		languageOptions: {
+			ecmaVersion: 2020,
+			sourceType: "module",
+			globals: {
+			...globals.browser,
+			...globals.node,
+			...globals.jest,
+			...globals.webextensions,
+			globalThis: "readonly",
+			chrome: "readonly",
+			browser: "readonly"
+		}
+		},
+
+		plugins: {
+			belgradian,
+			jsdoc,
+			"no-eslint-disable": { rules: noEslintDisableRules },
+			promise,
+			unicorn
+		},
+
+		settings: {
+			jsdoc: {
+				mode: "closure",
+				preferredTypes: {
+					object: "Object",
+					"*": false,
+					any: false
+				}
+			}
+		},
+
+		rules: {
 		"belgradian/member-prefix-rule": "error",
         "jsdoc/check-examples": "off",
         "jsdoc/check-param-names": "error",
@@ -63,47 +88,36 @@ module.exports = {
         "promise/no-nesting": "off",
         "promise/no-promise-in-callback": "warn",
         "promise/no-callback-in-promise": "warn",
-        "promise/avoid-new": "off",
-        "promise/no-new-statics": "error",
-        "promise/no-return-in-finally": "warn",
-		"promise/valid-params": "warn",
-		"no-eslint-disable/no-eslint-disable": "error",
-        "unicorn/catch-error-name": [
-            "error",
-            {
-                "name": "error"
-            }
-        ],
-        "unicorn/explicit-length-check": "off",
-        "unicorn/filename-case": [
-            "error",
-            {
-                "case": "pascalCase"
-            }
-        ],
-        "unicorn/no-abusive-eslint-disable": "error",
-        "unicorn/no-process-exit": "error",
-        "unicorn/throw-new-error": "error",
-        "unicorn/number-literal-case": "error",
-        "unicorn/escape-case": "error",
-		"unicorn/no-array-instanceof": "error",
-        "unicorn/no-new-buffer": "error",
-        "unicorn/no-hex-escape": "error",
-        "unicorn/custom-error-definition": "off",
-        "unicorn/prefer-starts-ends-with": "error",
-        "unicorn/prefer-string-slice": "error",
-        "unicorn/prefer-text-content": "error",
-        "unicorn/prefer-type-error": "error",
-        "unicorn/no-fn-reference-in-iterator": "off",
-        "unicorn/import-index": ["error", {"ignoreImports": true}],
-        "unicorn/new-for-builtins": "error",
-        "unicorn/regex-shorthand": "error",
-        "unicorn/prefer-spread": "error",
-        "unicorn/error-message": "off",
-        "unicorn/no-unsafe-regex": "off",
-        "unicorn/prefer-add-event-listener": "error",
-		"unicorn/no-console-spaces": "off",
-		"unicorn/expiring-todo-comments": [
+			"promise/avoid-new": "off",
+			"promise/no-new-statics": "error",
+			"promise/no-return-in-finally": "warn",
+			"promise/valid-params": "warn",
+			"no-eslint-disable/no-eslint-disable": "error",
+			"unicorn/explicit-length-check": "off",
+			"unicorn/filename-case": [
+				"error",
+				{
+					case: "pascalCase"
+				}
+			],
+			"unicorn/no-abusive-eslint-disable": "error",
+			"unicorn/no-process-exit": "error",
+			"unicorn/throw-new-error": "error",
+			"unicorn/number-literal-case": "error",
+			"unicorn/escape-case": "error",
+			"unicorn/custom-error-definition": "off",
+			"unicorn/prefer-string-replace-all": "error",
+			"unicorn/prefer-at": "error",
+			"unicorn/prefer-string-slice": "error",
+			"unicorn/prefer-type-error": "error",
+			"unicorn/prefer-array-some": "error",
+			"unicorn/no-array-callback-reference": "off",
+			"unicorn/new-for-builtins": "error",
+			"unicorn/error-message": "off",
+			"unicorn/no-unsafe-regex": "off",
+			"unicorn/prefer-add-event-listener": "error",
+			"unicorn/no-console-spaces": "off",
+			"unicorn/expiring-todo-comments": [
 			"error",
 			{
 				"terms": [
@@ -371,7 +385,7 @@ module.exports = {
         ],
         "require-atomic-updates": "error",
         "require-await": "error",
-        "require-jsdoc": ["error", {
+        "jsdoc/require-jsdoc": ["error", {
             "require": {
                 "FunctionDeclaration": true,
                 "MethodDefinition": true,
@@ -414,74 +428,55 @@ module.exports = {
         ],
         "valid-jsdoc": "off",
         "vars-on-top": "error",
-        "wrap-regex": "error",
-        "yield-star-spacing": "error"
+			"wrap-regex": "error",
+			"yield-star-spacing": "error"
+		}
 	},
-	"overrides": [
+
+	// Override for test mock files
 	{
-		"files": ["test/mocks/*.mock.js"],
-		"rules": 
-    	{
-        	"unicorn/filename-case": 
-        	[
-            	"error",
-            	{
-                	"case": "snakeCase"
-            	}
-			],
-			"require-jsdoc": "off",
-			"no-negated-condition":"off",
+		files: ["**/test/mocks/*.mock.js"],
+		rules: {
+			"unicorn/filename-case": ["error", { case: "snakeCase" }],
+			"jsdoc/require-jsdoc": "off",
+			"no-negated-condition": "off",
 			"no-nested-ternary": "off"
-    	}
+		}
 	},
+
+	// Override for script files
 	{
-		"files": ["src/scripts/*.js"],
-		"rules": 
-    	{
-        	"unicorn/filename-case": 
-        	[
-            	"error",
-            	{
-                	"case": "kebabCase"
-            	}
-			],
-			"require-jsdoc": "off",
-			"no-negated-condition":"off",
+		files: ["**/src/scripts/*.js"],
+		rules: {
+			"unicorn/filename-case": ["error", { case: "kebabCase" }],
+			"jsdoc/require-jsdoc": "off",
+			"no-negated-condition": "off",
 			"no-nested-ternary": "off"
-    	}
+		}
 	},
+
+	// Override for JSON files
 	{
-		"files": ["*.json"],
-		"rules": 
-    	{
-        	"unicorn/filename-case": 
-        	[
-            	"error",
-            	{
-                	"case": "kebabCase"
-            	}
-			]
-    	}
+		files: ["*.json"],
+		rules: {
+			"unicorn/filename-case": ["error", { case: "kebabCase" }]
+		}
 	},
+
+	// Override for test files
 	{
-		"files": ["test/*.Test.js"],
-		"rules": 
-		{
-			"no-unused-vars": 
-			[
+		files: ["test/*.Test.js", "test/**/*.test.js"],
+		rules: {
+			"no-unused-vars": [
 				"error",
 				{
-					"varsIgnorePattern": "should|expect"
+					varsIgnorePattern: "should|expect"
 				}
 			],
-			"mocha/no-exclusive-tests": "error",
-			"mocha/no-skipped-tests": "error",
-			"mocha/no-pending-tests": "error",
-			"mocha/no-identical-title": "error",
 			"promise/no-callback-in-promise": "off",
-			"complexity": "off",
+			complexity: "off",
 			"unicorn/prefer-add-event-listener": "off",
-			"require-jsdoc": "off"
-    	}
-	}]
-};
+			"jsdoc/require-jsdoc": "off"
+		}
+	}
+];
