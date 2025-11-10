@@ -1,24 +1,75 @@
 {
 	"name": "@proctorio/eslint-config",
-	"version": "2.6.0",
-	"description": "This package provides Proctorio's .eslintrc as an extensible shared config.",
+	"version": "3.0.0",
+	"type": "module",
+	"description": "Proctorio's opinionated ESLint configuration with strict JSDoc, Allman brace style, and tab indentation. Built for ESLint v9+ flat config.",
 	"main": "index.js",
 	"repository": {
 		"type": "git",
 		"url": "git@github.com:proctorio/eslint-config-proctorio.git"
 	},
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "NODE_OPTIONS=\"--experimental-vm-modules\" jest",
+		"test:coverage": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --coverage",
+		"test:watch": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --watch",
+		"prepare": "node scripts/generate-install.js"
 	},
 	"author": "Proctorio",
 	"license": "Unlicense",
 	"peerDependencies": {
-		"eslint": "9.27.0",
+		"eslint": "9.37.0",
 		"eslint-plugin-belgradian": "2.4.3",
-		"eslint-plugin-jsdoc": "50.6.17",
-		"eslint-plugin-mocha": "11.0.0",
+		"eslint-plugin-jsdoc": "60.8.3",
+		"eslint-plugin-no-eslint-disable": "3.0.2",
 		"eslint-plugin-promise": "7.2.1",
-		"eslint-plugin-unicorn": "59.0.1",
-		"eslint-plugin-no-eslint-disable": "1.0.1"
+		"eslint-plugin-unicorn": "61.0.2"
+	},
+	"devDependencies": {
+		"@eslint/js": "9.37.0",
+		"eslint": "9.37.0",
+		"eslint-plugin-belgradian": "2.4.3",
+		"eslint-plugin-jsdoc": "60.8.3",
+		"eslint-plugin-no-eslint-disable": "3.0.2",
+		"eslint-plugin-promise": "7.2.1",
+		"eslint-plugin-unicorn": "61.0.2",
+		"globals": "16.4.0",
+		"jest": "30.2.0"
+	},
+	"keywords": [
+		"eslint",
+		"eslintconfig",
+		"eslint-config",
+		"config",
+		"proctorio",
+		"javascript",
+		"styleguide",
+		"jsdoc",
+		"closure",
+		"flat-config",
+		"eslint9",
+		"code-quality",
+		"linting"
+	],
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"jest": {
+		"testEnvironment": "node",
+		"testMatch": [
+			"**/test/**/*.test.js"
+		],
+		"coverageDirectory": "coverage",
+		"collectCoverageFrom": [
+			"index.js",
+			"scripts/**/*.js"
+		],
+		"coverageThreshold": {
+			"global": {
+				"branches": 80,
+				"functions": 80,
+				"lines": 80,
+				"statements": 80
+			}
+		}
 	}
 }

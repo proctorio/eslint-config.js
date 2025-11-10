@@ -1,1 +1,24 @@
-.vscode
+# Development and test files
+test/
+coverage/
+.github/
+.vscode/
+
+# Documentation (keep README.md and LICENSE)
+MODERNIZATION_PLAN.md
+.gitignore
+
+# Lock files and configs
+package-lock.json
+node_modules/
+
+# CI/CD and git
+.git/
+*.log
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
