@@ -12,6 +12,19 @@ import tseslint from "typescript-eslint";
  * Disables JSDoc rules that conflict with TypeScript's type system.
  */
 export default [
+	// Standard ignores for TypeScript projects
+	{
+		ignores: [
+			"dist/",
+			"build/",
+			"coverage/",
+			"node_modules/",
+			"*.js",
+			"*.mjs",
+			"*.cjs"
+		]
+	},
+
 	...proctorioConfig,
 
 	// TypeScript parser and recommended rules
