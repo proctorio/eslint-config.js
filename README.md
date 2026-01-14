@@ -18,35 +18,13 @@ Proctorio's opinionated ESLint configuration for JavaScript projects. Built for 
 
 ## Installation
 
-### Step 1: Install the configuration package
-
 ```bash
-npm install --save-dev @proctorio/eslint-config
+npm install --save-dev @proctorio/eslint-config eslint
 ```
 
-### Step 2: Install peer dependencies
+All plugins and parser dependencies are bundled - just install eslint alongside the config.
 
-This config requires specific versions of ESLint and plugins. Install them with:
-
-```bash
-npm install --save-dev \
-  eslint@9.37.0 \
-  eslint-plugin-belgradian@2.4.3 \
-  eslint-plugin-jsdoc@60.8.3 \
-  eslint-plugin-no-eslint-disable@3.0.2 \
-  eslint-plugin-promise@7.2.1 \
-  eslint-plugin-unicorn@61.0.2
-```
-
-Or use the generated install script from this package:
-
-```bash
-bash node_modules/@proctorio/eslint-config/scripts/install.sh
-```
-
-> **Note:** The `install.sh` script is auto-generated from peerDependencies during `npm prepare`, ensuring versions stay in sync.
-
-### Step 3: Configure ESLint
+### JavaScript Projects
 
 Create an `eslint.config.js` file in your project root:
 
@@ -56,7 +34,23 @@ import proctorioConfig from "@proctorio/eslint-config";
 export default proctorioConfig;
 ```
 
-Or extend with your own rules:
+### TypeScript Projects
+
+For TypeScript projects, use the TypeScript-specific export:
+
+```javascript
+import proctorioConfig from "@proctorio/eslint-config/typescript";
+
+export default proctorioConfig;
+```
+
+The TypeScript config automatically:
+- Enables TypeScript parser and recommended rules
+- Disables JSDoc type rules (TypeScript handles types)
+- Relaxes filename case for TypeScript conventions
+- Configures proper unused variable handling
+
+### Extending with Custom Rules
 
 ```javascript
 import proctorioConfig from "@proctorio/eslint-config";
@@ -382,48 +376,8 @@ Minimum coverage thresholds:
 - [ESLint Flat Config Guide](https://eslint.org/docs/latest/use/configure/configuration-files-new)
 - [JSDoc Specification](https://jsdoc.app/)
 - [Google Closure Compiler](https://developers.google.com/closure/compiler/)
-
-## Changelog
-
-### v3.0.0 (October 2025)
-- ✨ Migrated to ESLint v9.37.0 flat config format
-- ✨ Updated to Jest 30.2.0 for testing (from Mocha/Chai/c8)
-- ✨ Full ES Module (ESM) support with `"type": "module"`
-- ✨ Updated all peer dependencies to latest stable versions:
-  - `eslint-plugin-jsdoc` 60.8.3 (from 46.8.2)
-  - `eslint-plugin-unicorn` 61.0.2 (from 49.0.0)
-  - `eslint-plugin-promise` 7.2.1 (from 6.1.1)
-  - `eslint-plugin-no-eslint-disable` 3.0.2 (from 1.0.1)
-- �️ Removed `eslint-plugin-chai-expect` (no longer needed with Jest)
-- 🗑️ Removed `eslint-plugin-mocha` (replaced with Jest)
-- �📝 Comprehensive documentation of all 12 non-standard rules with justifications
-- 🔧 Auto-generated install script from peerDependencies
-- 🧪 81 passing unit tests with >80% coverage requirements
-- � Cleaned up package structure (scripts included for auto-generation)
-
-<details>
-<summary><strong>Previous Versions (click to expand)</strong></summary>
-
-### v2.6.0 (June 2025)
-- ⬆️ Upgraded to ESLint 9.27.0
-- ⬆️ Updated `eslint-plugin-jsdoc` to 50.6.17
-- ⬆️ Updated `eslint-plugin-unicorn` to 59.0.1
-- ⬆️ Updated `eslint-plugin-promise` to 7.2.1
-- ⬆️ Updated `eslint-plugin-mocha` to 11.0.0
-- 🗑️ Removed `eslint-plugin-chai-expect` 3.0.0
-- 📄 Added security.txt
-
-### v2.5.12 (May 2025)
-- 🗑️ Removed Tailwind CSS plugin support
-
-### v2.5.11 (October 2024)
-- 🔧 Updated to support ES2020 syntax for jsdefender
-
-### v2.5.0 and earlier
-For changelog history prior to v2.5.0, see [git history](https://github.com/proctorio/eslint-config-proctorio/commits/main).
-
-</details>
+- [Changelog](CHANGELOG.md)
 
 ---
 
-**Made with ☕ by Proctorio**
+**Made with Proctorio**
