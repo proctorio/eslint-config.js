@@ -8,4 +8,5 @@ npm install --save-dev \
 	eslint-plugin-jsdoc@60.8.3 \
 	eslint-plugin-no-eslint-disable@3.0.2 \
 	eslint-plugin-promise@7.2.1 \
-	eslint-plugin-unicorn@61.0.2
+	eslint-plugin-unicorn@61.0.2 \
+	typescript-eslint@8.33.0
