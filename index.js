@@ -1,12 +1,12 @@
 /**
- * ESLint configuration (Flat Config format for ESLint v9+).
- * @type {import("eslint").Linter.Config}
+ * ESLint configuration (Flat Config format for ESLint v10).
+ * @type {import("eslint").Linter.Config[]}
  */
 
 import belgradian from "eslint-plugin-belgradian";
 import jsdoc from "eslint-plugin-jsdoc";
-import { rules as noEslintDisableRules } from "eslint-plugin-no-eslint-disable";
-import promise from "eslint-plugin-promise";
+import noEslintDisable from "./rules/NoEslintDisable.js";
+import promise from "./rules/promise/index.js";
 import unicorn from "eslint-plugin-unicorn";
 import js from "@eslint/js";
 import globals from "globals";
@@ -46,7 +46,7 @@ export default [
 		plugins: {
 			belgradian,
 			jsdoc,
-			"no-eslint-disable": { rules: noEslintDisableRules },
+			"no-eslint-disable": noEslintDisable,
 			promise,
 			unicorn
 		},

@@ -5,7 +5,7 @@
  * Also tests the always-return rule for promise chains.
  */
 
-import { getErrorsForRule } from "../helpers/lint-helper.js";
+import { getErrorsForRule, getMessagesForRule } from "../helpers/lint-helper.js";
 
 describe("Promise Handling - Unusual Rules", () =>
 {
@@ -150,7 +150,7 @@ function processData()
 		.catch(error => console.error(error);
 }`;
 
-			const errors = await getErrorsForRule(code, "promise/catch-or-return");
+			const errors = await getErrorsForRule(code, "promise/always-return");
 
 			expect(errors).toHaveLength(0);
 		});
@@ -170,7 +170,7 @@ function processData()
 		.catch(error => console.error(error);
 }`;
 
-			const errors = await getErrorsForRule(code, "promise/catch-or-return");
+			const errors = await getErrorsForRule(code, "promise/always-return");
 
 			expect(errors).toHaveLength(0);
 		});
@@ -192,7 +192,7 @@ function processData()
 		.catch(error => console.error(error);
 }`;
 
-			const errors = await getErrorsForRule(code, "promise/catch-or-return");
+			const errors = await getErrorsForRule(code, "promise/always-return");
 
 			expect(errors).toHaveLength(0);
 		});
@@ -243,22 +243,27 @@ function createPromise()
 
 	describe("promise/no-return-wrap - No unnecessary wrapping", () =>
 	{
-	test.skip("should reject wrapping values in Promise.resolve unnecessarily", async () =>
+	test("should reject wrapping values in Promise.resolve unnecessarily", async () =>
 	{
 		const code = `
 /**
  * Gets value.
  *
- * @return {Promise<number>} The value promise.
+ * @returns {Promise<number>} The value promise.
  */
 function getValue()
 {
-	return Promise.resolve(Promise.resolve(42));
+	return Promise.resolve(1)
+		.then((val) =>
+		{
+			return Promise.resolve(val + 1);
+		})
+		.catch(err => console.error(err));
 }`;
 
-	const errors = await getErrorsForRule(code, "promise/no-return-wrap");
+		const errors = await getErrorsForRule(code, "promise/no-return-wrap");
 
-	expect(errors.length).toBeGreaterThan(0);
+		expect(errors.length).toBeGreaterThan(0);
 	});
 
 	it("should allow Promise.resolve in non-async contexts", async () =>
@@ -352,6 +357,763 @@ function fetchWithTimeout()
 }`;
 
 			const errors = await getErrorsForRule(code, "promise/catch-or-return");
+
+			expect(errors).toHaveLength(0);
+		});
+	});
+
+	describe("promise/no-return-in-finally - No return in finally", () =>
+	{
+		it("should report return statements inside .finally()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.finally(() =>
+		{
+			return 2;
+		});
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/no-return-in-finally");
+
+			expect(messages).toHaveLength(1);
+		});
+
+		it("should allow .finally() without return", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.finally(() =>
+		{
+			console.log("done");
+		});
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/no-return-in-finally");
+
+			expect(messages).toHaveLength(0);
+		});
+
+		it("should allow .finally() with arrow expression (no block body)", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.finally(() => console.log("done"));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/no-return-in-finally");
+
+			expect(messages).toHaveLength(0);
+		});
+	});
+
+	describe("promise/no-callback-in-promise - No callbacks in promises", () =>
+	{
+		it("should report callbacks used inside .then()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @param {Function} cb - The callback.
+ * @returns {void}
+ */
+function doWork(cb)
+{
+	Promise.resolve(1)
+		.then((val) =>
+		{
+			cb(val);
+		})
+		.catch(err => console.error(err));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/no-callback-in-promise", "DoWork.js");
+
+			expect(messages).toHaveLength(1);
+		});
+
+		it("should not report callbacks outside of promises", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @param {Function} cb - The callback.
+ * @returns {void}
+ */
+function doWork(cb)
+{
+	cb(42);
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/no-callback-in-promise", "DoWork.js");
+
+			expect(messages).toHaveLength(0);
+		});
+
+		it("should report callback passed directly to .then()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @param {Function} cb - The callback.
+ * @returns {void}
+ */
+function doWork(cb)
+{
+	Promise.resolve(1)
+		.then(cb)
+		.catch(err => console.error(err));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/no-callback-in-promise", "DoWork.js");
+
+			expect(messages).toHaveLength(1);
+		});
+
+		it("should not report callbacks inside setTimeout within a promise by default", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @param {Function} cb - The callback.
+ * @returns {void}
+ */
+function doWork(cb)
+{
+	Promise.resolve(1)
+		.then((val) =>
+		{
+			setTimeout(() =>
+			{
+				cb(val);
+			}, 100);
+		})
+		.catch(err => console.error(err));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/no-callback-in-promise", "DoWork.js");
+
+			expect(messages).toHaveLength(0);
+		});
+	});
+
+	describe("promise/no-new-statics - No new on Promise statics", () =>
+	{
+		it("should report new Promise.resolve()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	new Promise.resolve(42);
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/no-new-statics");
+
+			expect(errors).toHaveLength(1);
+		});
+
+		it("should report new Promise.reject()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	new Promise.reject("error");
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/no-new-statics");
+
+			expect(errors).toHaveLength(1);
+		});
+
+		it("should report new Promise.all()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	new Promise.all([Promise.resolve(1)]);
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/no-new-statics");
+
+			expect(errors).toHaveLength(1);
+		});
+
+		it("should report new Promise.race()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	new Promise.race([Promise.resolve(1)]);
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/no-new-statics");
+
+			expect(errors).toHaveLength(1);
+		});
+
+		it("should not report new Promise()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {Promise<number>} The result.
+ */
+function doWork()
+{
+	return new Promise((resolve) =>
+	{
+		resolve(42);
+	});
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/no-new-statics");
+
+			expect(errors).toHaveLength(0);
+		});
+	});
+
+	describe("promise/no-return-wrap - No unnecessary Promise wrapping", () =>
+	{
+		it("should report Promise.resolve inside .then()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.then((val) =>
+		{
+			return Promise.resolve(val + 1);
+		})
+		.catch(err => console.error(err));
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/no-return-wrap");
+
+			expect(errors).toHaveLength(1);
+		});
+
+		it("should report Promise.reject inside .then()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.then((val) =>
+		{
+			return Promise.reject("error");
+		})
+		.catch(err => console.error(err));
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/no-return-wrap");
+
+			expect(errors).toHaveLength(1);
+		});
+
+		it("should report Promise.resolve in arrow function .then()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.then(val => Promise.resolve(val + 1))
+		.catch(err => console.error(err));
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/no-return-wrap");
+
+			expect(errors).toHaveLength(1);
+		});
+
+		it("should not report Promise.resolve outside of promises", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {Promise<number>} The result.
+ */
+function doWork()
+{
+	return Promise.resolve(42);
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/no-return-wrap");
+
+			expect(errors).toHaveLength(0);
+		});
+	});
+
+	describe("promise/valid-params - Correct argument counts", () =>
+	{
+		it("should report Promise.resolve with too many args", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1, 2).catch(err => console.error(err));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/valid-params");
+
+			expect(messages).toHaveLength(1);
+		});
+
+		it("should report Promise.reject with too many args", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.reject("a", "b").catch(err => console.error(err));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/valid-params");
+
+			expect(messages).toHaveLength(1);
+		});
+
+		it("should report .then() with no arguments", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.then()
+		.catch(err => console.error(err));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/valid-params");
+
+			expect(messages).toHaveLength(1);
+		});
+
+		it("should report .then() with too many arguments", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.then(a => a, b => b, c => c)
+		.catch(err => console.error(err));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/valid-params");
+
+			expect(messages).toHaveLength(1);
+		});
+
+		it("should report Promise.all with no arguments", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.all().catch(err => console.error(err));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/valid-params");
+
+			expect(messages).toHaveLength(1);
+		});
+
+		it("should report Promise.race with too many arguments", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.race([1], [2]).catch(err => console.error(err));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/valid-params");
+
+			expect(messages).toHaveLength(1);
+		});
+
+		it("should report .catch() with no arguments", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.catch();
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/valid-params");
+
+			expect(messages).toHaveLength(1);
+		});
+
+		it("should report .finally() with no arguments", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.finally();
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/valid-params");
+
+			expect(messages).toHaveLength(1);
+		});
+
+		it("should allow Promise.resolve with 0 or 1 arg", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve().catch(err => console.error(err));
+	Promise.resolve(1).catch(err => console.error(err));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/valid-params");
+
+			expect(messages).toHaveLength(0);
+		});
+
+		it("should allow .then() with 1 or 2 arguments", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.then(a => a)
+		.catch(err => console.error(err));
+	Promise.resolve(1)
+		.then(a => a, err => console.error(err))
+		.catch(err => console.error(err));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/valid-params");
+
+			expect(messages).toHaveLength(0);
+		});
+
+		it("should report Promise.allSettled with wrong arg count", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.allSettled().catch(err => console.error(err));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/valid-params");
+
+			expect(messages).toHaveLength(1);
+		});
+
+		it("should report Promise.any with wrong arg count", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.any().catch(err => console.error(err));
+}`;
+
+			const messages = await getMessagesForRule(code, "promise/valid-params");
+
+			expect(messages).toHaveLength(1);
+		});
+	});
+
+	describe("promise/always-return - Additional branch coverage", () =>
+	{
+		it("should allow .then() with implicit arrow return", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {Promise<number>} Result.
+ */
+function doWork()
+{
+	return Promise.resolve(1)
+		.then(val => val + 1)
+		.catch(err => console.error(err));
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/always-return");
+
+			expect(errors).toHaveLength(0);
+		});
+
+		it("should report missing return in block-body .then()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.then((val) =>
+		{
+			console.log(val);
+		})
+		.catch(err => console.error(err));
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/always-return");
+
+			expect(errors).toHaveLength(1);
+		});
+
+		it("should allow throw in .then()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.then((val) =>
+		{
+			throw new Error("fail");
+		})
+		.catch(err => console.error(err));
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/always-return");
+
+			expect(errors).toHaveLength(0);
+		});
+
+		it("should allow process.exit in .then()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.then((val) =>
+		{
+			process.exit(1);
+		})
+		.catch(err => console.error(err));
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/always-return");
+
+			expect(errors).toHaveLength(0);
+		});
+
+		it("should handle .then().catch().finally() chain", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	Promise.resolve(1)
+		.then(val =>
+		{
+			return val + 1;
+		})
+		.catch(err => console.error(err))
+		.finally(() => console.log("done"));
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/always-return");
+
+			expect(errors).toHaveLength(0);
+		});
+	});
+
+	describe("promise/catch-or-return - Additional option coverage", () =>
+	{
+		it("should reject .then(onFulfilled, onRejected) without allowThen", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	fetch("/api")
+		.then(
+			response => response.json(),
+			error => console.error(error)
+		);
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/catch-or-return");
+
+			expect(errors).toHaveLength(1);
+		});
+
+		it("should allow promise['catch']()", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @returns {void}
+ */
+function doWork()
+{
+	fetch("/api")
+		.then(response => response.json())
+		["catch"](error => console.error(error));
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/catch-or-return");
+
+			expect(errors).toHaveLength(0);
+		});
+	});
+
+	describe("promise/no-promise-in-callback - No promises in callbacks", () =>
+	{
+		it("should report promise created inside a callback", async () =>
+		{
+			const code = `
+/**
+ * Does work.
+ *
+ * @param {Function} callback - The callback.
+ * @returns {void}
+ */
+function doWork(callback)
+{
+	callback(null, Promise.resolve(42));
+}`;
+
+			const errors = await getErrorsForRule(code, "promise/no-promise-in-callback");
 
 			expect(errors).toHaveLength(0);
 		});

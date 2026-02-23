@@ -2,7 +2,7 @@
  * Tests for TypeScript configuration.
  */
 
-import { describe, test, expect, beforeAll } from "@jest/globals";
+import { describe, test, expect, beforeAll } from "vitest";
 import { ESLint } from "eslint";
 import { join } from "path";
 
