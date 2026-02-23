@@ -1,6 +1,6 @@
 {
 	"name": "@proctorio/eslint-config",
-	"version": "4.0.0",
+	"version": "4.0.1",
 	"type": "module",
 	"description": "Proctorio's opinionated ESLint configuration with strict JSDoc, Allman brace style, and tab indentation. Built for ESLint v10 flat config. Includes TypeScript support.",
 	"main": "index.js",
