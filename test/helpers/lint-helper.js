@@ -117,10 +117,26 @@ async function getErrorsForRule(code, ruleId, filename = "test.js")
 	return messages.filter(msg => msg.ruleId === ruleId && msg.severity === 2);
 }
 
+/**
+ * Gets all messages (errors and warnings) for a specific rule.
+ *
+ * @param {string} code - The code to lint.
+ * @param {string} ruleId - The rule ID to filter messages for.
+ * @param {string} [filename="test.js"] - The filename to use for linting context.
+ * @returns {Promise<Array>} Array of all messages for the specified rule.
+ */
+async function getMessagesForRule(code, ruleId, filename = "test.js")
+{
+	const messages = await lintCode(code, filename);
+
+	return messages.filter(msg => msg.ruleId === ruleId);
+}
+
 export {
 	createLinter,
 	lintCode,
 	assertValid,
 	assertInvalid,
-	getErrorsForRule
+	getErrorsForRule,
+	getMessagesForRule
 };

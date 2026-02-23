@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-02-21
+
+### Changed
+- Upgraded from ESLint 9 to ESLint 10
+- Upgraded `@eslint/js` to 10.0.1
+- Migrated test runner from Jest to Vitest 4.0.18 to eliminate transitive vulnerabilities (glob/minimatch)
+- Moved `typescript-eslint` to `peerDependencies` to avoid shipping minimatch vulnerabilities
+- Inlined `eslint-plugin-promise` as `rules/promise/` to eliminate peer dependency conflicts with ESLint 10
+- Inlined `eslint-plugin-no-eslint-disable` as `rules/NoEslintDisable.js` — original package was unmaintained
+- Added `@vitest/coverage-v8` for code coverage with 80% threshold on branches, functions, lines, statements
+
+### Removed
+- Removed `eslint-plugin-promise` npm dependency (rules inlined)
+- Removed `eslint-plugin-no-eslint-disable` npm dependency (rule inlined)
+- Removed Jest and all Jest-related dependencies
+
+### Security
+- `npm audit --omit=dev` now reports 0 vulnerabilities
+
 ## [3.3.0] - 2026-01-13
 
 ### Added
@@ -37,26 +56,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2025-11-15
 
 ### Added
-- ESLint v9.37.0 flat config format support
+- ESLint v9 flat config format support
 - Full ES Module (ESM) support with `"type": "module"`
 - 91+ unit tests with >80% coverage requirements
 
 ### Changed
-- Migrated from Mocha/Chai/c8 to Jest 30.2.0 for testing
+- Migrated from Mocha/Chai/c8 to Jest for testing
 - Updated all plugin dependencies to latest stable versions
 
 ### Removed
-- Removed `eslint-plugin-chai-expect`
 - Removed `eslint-plugin-mocha`
 
 ## [2.6.0] - 2025-06-15
 
+### Added
+- Added security.txt
+
 ### Changed
 - Upgraded to ESLint 9.27.0
 - Updated all plugins to ESLint 9 compatible versions
-
-### Added
-- Added security.txt
 
 ### Removed
 - Removed `eslint-plugin-chai-expect`
@@ -71,6 +89,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated to support ES2020 syntax
 
+[4.0.0]: https://dev.azure.com/echovoice/Open/_git/eslint-config.js/branchCompare?baseVersion=GT3.3.0&targetVersion=GT4.0.0
+[3.3.0]: https://dev.azure.com/echovoice/Open/_git/eslint-config.js/branchCompare?baseVersion=GT3.2.0&targetVersion=GT3.3.0
 [3.2.0]: https://dev.azure.com/echovoice/Open/_git/eslint-config.js/branchCompare?baseVersion=GT3.1.0&targetVersion=GT3.2.0
 [3.1.0]: https://dev.azure.com/echovoice/Open/_git/eslint-config.js/branchCompare?baseVersion=GT3.0.0&targetVersion=GT3.1.0
 [3.0.0]: https://dev.azure.com/echovoice/Open/_git/eslint-config.js/branchCompare?baseVersion=GT2.6.0&targetVersion=GT3.0.0

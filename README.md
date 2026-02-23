@@ -1,30 +1,33 @@
 # @proctorio/eslint-config
 
 [![npm version](https://img.shields.io/npm/v/@proctorio/eslint-config.svg)](https://www.npmjs.com/package/@proctorio/eslint-config)
-[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/)
+[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](https://unlicense.org/)
 
-Proctorio's opinionated ESLint configuration for JavaScript projects. Built for **ESLint v9+ flat config** with strict code quality standards.
+Proctorio's opinionated ESLint configuration for JavaScript and TypeScript projects. Built for **ESLint v10 flat config** with strict code quality standards.
 
-## Features
-
-- ✅ **ESLint v9+ Flat Config** - Modern configuration format
-- 📝 **Mandatory JSDoc** - Complete documentation on all functions
-- 🎨 **Allman Brace Style** - Opening braces on new lines
-- ↹ **Tab Indentation** - Accessibility-friendly formatting
-- 📦 **PascalCase Filenames** - Consistent module naming
-- 🚫 **No Disable Comments** - Enforced code quality standards
-- 🔍 **Strict Promise Handling** - Proper error handling required
-- 📅 **Expiring TODO Comments** - Prevents technical debt accumulation
+**This is a strict config.** It enforces Allman brace style, tab indentation, mandatory JSDoc, PascalCase filenames, and many other non-standard rules. Adopting it on an existing codebase will produce significant lint errors. Review the rules below before adopting.
 
 ## Installation
+
+**JavaScript projects:**
 
 ```bash
 npm install --save-dev @proctorio/eslint-config eslint
 ```
 
-All plugins and parser dependencies are bundled - just install eslint alongside the config.
+**TypeScript projects:**
 
-### JavaScript Projects
+```bash
+npm install --save-dev @proctorio/eslint-config eslint typescript-eslint
+```
+
+Plugin dependencies (JSDoc, Unicorn, Belgradian, etc.) are bundled. `eslint` is a required peer dependency (exact version `10.0.0`). `typescript-eslint` is an optional peer dependency, only needed for TypeScript projects.
+
+Promise rules and the no-eslint-disable rule are inlined from their original packages to eliminate dependency conflicts.
+
+## Setup
+
+### JavaScript
 
 Create an `eslint.config.js` file in your project root:
 
@@ -34,9 +37,7 @@ import proctorioConfig from "@proctorio/eslint-config";
 export default proctorioConfig;
 ```
 
-### TypeScript Projects
-
-For TypeScript projects, use the TypeScript-specific export:
+### TypeScript
 
 ```javascript
 import proctorioConfig from "@proctorio/eslint-config/typescript";
@@ -44,11 +45,17 @@ import proctorioConfig from "@proctorio/eslint-config/typescript";
 export default proctorioConfig;
 ```
 
-The TypeScript config automatically:
-- Enables TypeScript parser and recommended rules
-- Disables JSDoc type rules (TypeScript handles types)
-- Relaxes filename case for TypeScript conventions
-- Configures proper unused variable handling
+The TypeScript config extends the base JavaScript config and adds:
+- TypeScript parser and `typescript-eslint` recommended rules
+- Disables 8 JSDoc rules that conflict with TypeScript (type annotations, descriptions, tag names, jsdoc requirement)
+- Disables `unicorn/filename-case` (TypeScript projects often use lowercase)
+- Disables `belgradian/member-prefix-rule` (TypeScript does not use Hungarian naming)
+- Disables `complexity`, `max-depth`, `no-await-in-loop`, `require-await`, `require-unicode-regexp`, `radix`
+- Disables `no-undefined`, `no-continue`, `class-methods-use-this`, `no-process-env`, `global-require`, `no-new`
+- Replaces `no-unused-vars` with `@typescript-eslint/no-unused-vars` (ignores `_` prefixed args)
+- Disables `no-undef` (TypeScript handles this)
+- Ignores `*.js`, `*.mjs`, `*.cjs`, `dist/`, `build/`, `coverage/`, `node_modules/` by default
+- Relaxes `@typescript-eslint/no-explicit-any` and `no-non-null-assertion` in test files
 
 ### Extending with Custom Rules
 
@@ -58,75 +65,60 @@ import proctorioConfig from "@proctorio/eslint-config";
 export default [
   ...proctorioConfig,
   {
-    // Your custom rules here
     rules: {
-      // Override or add rules
+      // Your overrides here
     }
   }
 ];
 ```
 
-## Non-Standard Rules
+## Rules
 
-This configuration enforces several rules that differ from common JavaScript conventions. These choices reflect Proctorio's coding standards and priorities.
+This configuration enforces several rules that differ from common JavaScript conventions. These choices reflect Proctorio's coding standards.
 
-### 1. Allman Brace Style (Non-standard)
+### Allman Brace Style
 
-**Rule:** `"brace-style": ["error", "allman", { "allowSingleLine": true }]`
+`"brace-style": ["error", "allman", { "allowSingleLine": true }]`
 
-Opening braces must be on a new line (Allman style), contrary to the popular "1TBS" (One True Brace Style) used by Airbnb and most JavaScript projects.
-
-**Why:** Proctorio house style preference for visual clarity and consistency with other languages.
+Opening braces on a new line, contrary to the popular 1TBS used by most JavaScript projects.
 
 ```javascript
-// ✅ Correct (Allman)
+// Correct (Allman)
 function example()
 {
 	return 42;
 }
 
-// ❌ Incorrect (1TBS)
+// Incorrect (1TBS)
 function example() {
 	return 42;
 }
 ```
 
-### 2. Tab Indentation (Non-standard)
+### Tab Indentation
 
-**Rule:** `"indent": ["error", "tab", {...}]`
+`"indent": ["error", "tab", {...}]`
 
-Tabs required for indentation instead of spaces. Over 90% of JavaScript projects use spaces (typically 2 or 4).
+Tabs required instead of spaces. Most JavaScript projects use 2 or 4 spaces. Tabs allow developers to configure display width to their own preference.
 
-**Why:** Accessibility - developers can configure tab width to their preference. Also aligns with Proctorio coding standards.
+### PascalCase Filenames
 
-### 3. PascalCase Filenames (Non-standard)
+`"unicorn/filename-case": ["error", { "case": "pascalCase" }]`
 
-**Rule:** `"unicorn/filename-case": ["error", { "case": "pascalCase" }]`
-
-Files must use PascalCase naming. Most JavaScript projects use camelCase or kebab-case.
-
-**Why:** Proctorio naming convention for modules, treating files as importable units similar to classes.
+Files must use PascalCase naming. Overrides exist for test mocks (snake_case), scripts (kebab-case), and JSON files (kebab-case).
 
 ```
-✅ Correct: UserService.js, HttpClient.js, DataModel.js
-❌ Incorrect: userService.js, http-client.js, data_model.js
+Correct:   UserService.js, HttpClient.js, DataModel.js
+Incorrect: userService.js, http-client.js, data_model.js
 ```
 
-**Exceptions via overrides:**
-- `test/mocks/*.mock.js` - snake_case allowed
-- `src/scripts/*.js` - kebab-case allowed
-- `*.json` - kebab-case allowed
+### Mandatory JSDoc
 
-### 4. Mandatory JSDoc on All Functions (Stricter than standard)
+`"jsdoc/require-jsdoc": ["error", { require: { FunctionDeclaration, MethodDefinition, ClassDeclaration, ArrowFunctionExpression, FunctionExpression } }]`
 
-**Rule:** `"jsdoc/require-jsdoc": ["error", {...}]`
-
-JSDoc required on ALL function types: declarations, expressions, arrow functions, methods, and class declarations.
-
-**Why:** Code documentation standards for maintainability in large teams. Airbnb and most configs make JSDoc optional.
+JSDoc is required on all function types and class declarations. Descriptions must be complete sentences. A hyphen is required before each `@param` description.
 
 ```javascript
-// ✅ Correct
 /**
  * Calculates the sum of two numbers.
  *
@@ -140,116 +132,102 @@ function add(a, b)
 }
 ```
 
-### 5. JSDoc Complete Sentences Required (Stricter than standard)
+### Closure-Mode JSDoc
 
-**Rule:** `"jsdoc/require-description-complete-sentence": "error"`
+JSDoc is set to `"closure"` mode with strict type enforcement:
+- Use `Object` not `object` for types
+- Wildcard `*` types are banned
+- `any` types are banned
+- Description style is set to `"tag"` (requires `@description` tag rather than the first line being treated as a description)
 
-All JSDoc descriptions must be complete sentences with proper capitalization and punctuation.
+### No ESLint Disable Comments
 
-**Why:** Professional documentation standards. Most configs exclude this as "too demanding."
+`"no-eslint-disable/no-eslint-disable": "error"`
 
-### 6. No ESLint Disable Comments Allowed (Unique)
+All `eslint-disable` comments are banned. Fix the code instead of disabling the rule.
 
-**Rule:** `"no-eslint-disable/no-eslint-disable": "error"`
+### Promise Handling
 
-Prevents developers from using `eslint-disable` comments to bypass linting rules.
+`"promise/catch-or-return": ["error", { terminationMethod: ["catch", "finally"] }]`
 
-**Why:** Enforces consistent code quality across all codebases. Prevents "quick fixes" that accumulate technical debt.
+Promises must be terminated with `.catch()` or `.finally()`. Additionally: `promise/always-return` requires a return in `.then()`, `promise/no-return-wrap` prevents unnecessary `Promise.resolve()`/`Promise.reject()` wrapping, and `promise/param-names` enforces consistent `resolve`/`reject` naming.
 
-### 7. Closure JSDoc Mode with Strict Types (Non-standard)
+### Double Quotes
 
-**Rule:** JSDoc mode set to `"closure"` with banned `*` and `any` types
+`"quotes": ["error", "double", { "avoidEscape": true, "allowTemplateLiterals": false }]`
 
-Uses Google Closure Compiler JSDoc syntax instead of the more common TypeScript mode. Prohibits wildcard (`*`) and `any` types.
+Double quotes required. Single quotes allowed only to avoid escaping. Template literals are not allowed as simple strings.
 
-**Why:** Stricter type checking requirements for better code safety.
+### Newline Before Return
 
-### 8. Promise Termination Methods (Non-standard)
+`"newline-before-return": "error"`
 
-**Rule:** `"promise/catch-or-return": ["error", { terminationMethod: ['catch', 'finally'] }]`
+A blank line is required before every `return` statement. ESLint deprecated this rule but has not removed it. Proctorio continues to enforce it.
 
-Promises must be terminated with either `.catch()` or `.finally()`. Standard configs usually only require `.catch()`.
+### Expiring TODO Comments
 
-**Why:** More flexible promise handling patterns while still ensuring proper error handling.
+`"unicorn/expiring-todo-comments": ["error", { "terms": ["todo", "fixme", "xxx"] }]`
 
-```javascript
-// ✅ Correct
-fetchData()
-	.then(process)
-	.catch(handleError);
-
-// ✅ Also correct
-fetchData()
-	.then(process)
-	.finally(cleanup);
-```
-
-### 9. Newline Before Return (Deprecated by many)
-
-**Rule:** `"newline-before-return": "error"`
-
-Requires a blank line before return statements. This rule is deprecated in favor of `padding-line-between-statements` but still works.
-
-**Why:** Visual separation for readability.
-
-### 10. Expiring TODO Comments (Stricter than standard)
-
-**Rule:** `"unicorn/expiring-todo-comments": ["error", { "terms": ["todo", "fixme", "xxx"] }]`
-
-TODO/FIXME comments must include expiration dates or issue references.
-
-**Why:** Prevents technical debt accumulation by requiring accountability for temporary code.
+TODO, FIXME, and XXX comments must include an expiration date or issue reference.
 
 ```javascript
-// ✅ Correct
-// TODO [2025-12-31]: Refactor this function
+// Correct
+// TODO [2026-12-31]: Refactor this function
 // TODO [#123]: Fix performance issue
 
-// ❌ Incorrect
+// Incorrect
 // TODO: fix this later
 ```
 
-### 11. Custom Member Prefix Rule (Proprietary)
+### Member Prefix Rule (Belgradian)
 
-**Rule:** `"belgradian/member-prefix-rule": "error"`
+`"belgradian/member-prefix-rule": "error"`
 
-Enforces Proctorio-specific naming conventions via proprietary `eslint-plugin-belgradian`.
+Enforces Hungarian-style `m_` prefix on member and global variables (pattern: `^m_[a-z]+[A-Z]*\S*`). ALL_CAPS constants are exempt. Disabled in the TypeScript config.
 
-**Why:** Internal Proctorio coding standards for member naming patterns.
+### Other Notable Rules
 
-### 12. Double Quotes Required (With escape exception)
+These rules are less common and may surprise developers adopting this config:
 
-**Rule:** `"quotes": ["error", "double", { "avoidEscape": true }]`
+| Rule | Effect |
+|---|---|
+| `require-unicode-regexp` | All regexps must use the `u` flag |
+| `no-sync` | Bans synchronous methods (`fs.readFileSync`, etc.) |
+| `no-continue` | Bans `continue` statements |
+| `no-eq-null` | Bans `== null` comparisons |
+| `no-process-env` | Bans `process.env` access |
+| `no-process-exit` | Bans `process.exit()` |
+| `linebreak-style` | Requires Unix line endings (LF) |
+| `require-await` | Async functions must contain `await` |
+| `no-await-in-loop` | Bans `await` inside loops |
 
-Double quotes required for strings, but single quotes allowed when avoiding escapes.
+### Parser Settings
 
-**Why:** Consistency with other languages and readability.
+- **`ecmaVersion: 2020`** — ES2020 syntax supported. ES2021+ features like `??=` or `||=` will not parse.
+- **`sourceType: "module"`** — All files are treated as ES modules. CommonJS `require()` calls may produce warnings.
 
-## File Structure Overrides
+## File Overrides
 
-The config includes special rules for specific file types:
+### Test Mock Files (`**/test/mocks/*.mock.js`)
+- Filename case: snake_case
+- JSDoc not required
+- `no-negated-condition` and `no-nested-ternary` disabled
 
-### Test Mock Files (`test/mocks/*.mock.js`)
-- **Filename case:** snake_case allowed
-- **JSDoc:** Not required
-- Allows more flexible code patterns for test data
-
-### Script Files (`src/scripts/*.js`)
-- **Filename case:** kebab-case allowed
-- **JSDoc:** Not required
-- Suitable for build scripts and utilities
+### Script Files (`**/src/scripts/*.js`)
+- Filename case: kebab-case
+- JSDoc not required
+- `no-negated-condition` and `no-nested-ternary` disabled
 
 ### JSON Files (`*.json`)
-- **Filename case:** kebab-case allowed
+- Filename case: kebab-case
 
-### Test Files (`test/**/*.test.js`)
-- **JSDoc:** Not required
-- **Unused vars:** `should` and `expect` ignored
-- More relaxed rules for test assertions
+### Test Files (`test/*.Test.js`, `test/**/*.test.js`)
+- JSDoc not required
+- `should` and `expect` ignored for unused variable checks
+- `complexity` and `unicorn/prefer-add-event-listener` disabled
+- `promise/no-callback-in-promise` disabled
 
 ## Ignored Directories
-
-The following directories are ignored by default:
 
 - `**/tools/**`
 - `**/build/**`
@@ -258,126 +236,59 @@ The following directories are ignored by default:
 - `**/src/_data/eleventyComputed.js`
 - `**/external/**`
 
-## Supported Environments
+## Globals
 
-This config sets up globals for:
+This config provides globals for:
 
-- **Browser** - Window, document, etc.
-- **Node.js** - process, __dirname, require, etc.
-- **Web Extensions** - Chrome and browser APIs
-- **Testing** - Jest globals (describe, it, test, expect, etc.)
+- **Browser** — `window`, `document`, etc.
+- **Node.js** — `process`, `__dirname`, `require`, etc.
+- **Web Extensions** — `chrome`, `browser` (also set as explicit `readonly`)
+- **Jest** — `describe`, `it`, `test`, `expect`, `beforeEach`, etc. (via `globals.jest`)
+- **`globalThis`** — set as `readonly`
 
-## Testing Your Code
+## Migration from `.eslintrc` (ESLint v8/v9)
 
-To lint your project:
+ESLint v9 introduced flat config as the default, and v10 continues it. If you're migrating from the old `.eslintrc` JSON format:
 
-```bash
-npx eslint .
-```
-
-To lint with automatic fixes:
-
-```bash
-npx eslint . --fix
-```
-
-## Package.json Script Example
-
-Add these scripts to your `package.json`:
-
-```json
-{
-  "scripts": {
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
-  }
-}
-```
-
-## CI/CD Integration
-
-### GitHub Actions Example
-
-```yaml
-name: Lint
-
-on: [push, pull_request]
-
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-      - run: npm ci
-      - run: npm run lint
-```
-
-## Migration from Old Config
-
-If you're migrating from the old `.eslintrc` format:
-
-### Before (ESLint v8)
-
+**Before:**
 ```json
 {
   "extends": "@proctorio/eslint-config"
 }
 ```
 
-### After (ESLint v9+)
-
+**After:**
 ```javascript
 import proctorioConfig from "@proctorio/eslint-config";
 
 export default proctorioConfig;
 ```
 
-**Key changes:**
-- File changed from `.eslintrc.json` to `eslint.config.js`
-- Format changed from JSON to ES modules
-- Config is now an array of configuration objects
+Config file changes from `.eslintrc.json` to `eslint.config.js`, format changes from JSON to ES modules, and the config is now an array of configuration objects.
 
 ## Development
 
-### Running Tests
-
-This package includes comprehensive unit tests:
+This package uses [Vitest](https://vitest.dev/) for testing:
 
 ```bash
 npm test              # Run all tests
-npm run test:coverage # Run tests with coverage
+npm run test:coverage # Run tests with coverage (80% threshold)
 npm run test:watch    # Run tests in watch mode
 ```
-
-### Test Coverage
-
-Minimum coverage thresholds:
-- **Branches:** 80%
-- **Functions:** 80%
-- **Lines:** 80%
-- **Statements:** 80%
 
 ## Requirements
 
 - **Node.js:** >= 18.0.0
-- **ESLint:** 9.37.0
-- **Package Type:** ESM (ES Modules)
+- **ESLint:** 10.0.0 (exact — pinned peer dependency)
+- **Package Type:** ESM
 
 ## License
 
-[Unlicense](http://unlicense.org/) - This is free and unencumbered software released into the public domain.
+[Unlicense](https://unlicense.org/)
 
 ## Resources
 
 - [ESLint Documentation](https://eslint.org/docs/latest/)
-- [ESLint Flat Config Guide](https://eslint.org/docs/latest/use/configure/configuration-files-new)
-- [JSDoc Specification](https://jsdoc.app/)
-- [Google Closure Compiler](https://developers.google.com/closure/compiler/)
+- [ESLint Flat Config Guide](https://eslint.org/docs/latest/use/configure/configuration-files)
+- [JSDoc Reference](https://jsdoc.app/)
 - [Changelog](CHANGELOG.md)
-
----
-
-**Made with Proctorio**
