@@ -20,7 +20,9 @@ export default [
 			"**/lib/**",
 			"**/rollup.config.*.js",
 			"**/src/_data/eleventyComputed.js",
-			"**/external/**"
+			"**/external/**",
+			"**/*.min.js",
+			"**/_trap/**"
 		]
 	},
 
@@ -39,7 +41,11 @@ export default [
 			...globals.webextensions,
 			globalThis: "readonly",
 			chrome: "readonly",
-			browser: "readonly"
+			browser: "readonly",
+			__IS_DEV_ENV__: "readonly",
+			__GAB_VERSION__: "readonly",
+			__APP_VERSION__: "readonly",
+			__BUILD_TIME__: "readonly"
 		}
 		},
 
