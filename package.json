@@ -1,64 +1,64 @@
 {
-	"name": "@proctorio/eslint-config",
-	"version": "4.0.0",
-	"type": "module",
-	"description": "Proctorio's opinionated ESLint configuration with strict JSDoc, Allman brace style, and tab indentation. Built for ESLint v10 flat config. Includes TypeScript support.",
-	"main": "index.js",
-	"repository": {
-		"type": "git",
-		"url": "git@github.com:proctorio/eslint-config-proctorio.git"
-	},
-	"scripts": {
-		"test": "vitest run",
-		"test:coverage": "vitest run --coverage",
-		"test:watch": "vitest watch"
-	},
-	"author": "Proctorio",
-	"license": "Unlicense",
-	"peerDependencies": {
-		"eslint": "10.0.0",
-		"typescript-eslint": ">=8.0.0"
-	},
-	"peerDependenciesMeta": {
-		"typescript-eslint": {
-			"optional": true
-		}
-	},
-	"dependencies": {
-		"@eslint/js": "10.0.1",
-		"eslint-plugin-belgradian": "2.4.3",
-		"eslint-plugin-jsdoc": "62.7.0",
-		"eslint-plugin-unicorn": "63.0.0",
-		"globals": "16.4.0"
-	},
-	"devDependencies": {
-		"@vitest/coverage-v8": "4.0.18",
-		"eslint": "10.0.0",
-		"typescript": "5.9.3",
-		"typescript-eslint": "8.56.1",
-		"vitest": "4.0.18"
-	},
-	"keywords": [
-		"eslint",
-		"eslintconfig",
-		"eslint-config",
-		"config",
-		"proctorio",
-		"javascript",
-		"typescript",
-		"styleguide",
-		"jsdoc",
-		"closure",
-		"flat-config",
-		"eslint10",
-		"code-quality",
-		"linting"
-	],
-	"engines": {
-		"node": ">=18.0.0"
-	},
-	"exports": {
-		".": "./index.js",
-		"./typescript": "./typescript.js"
-	}
+    "name": "@proctorio/eslint-config",
+    "version": "4.0.3",
+    "type": "module",
+    "description": "Proctorio's opinionated ESLint configuration with strict JSDoc, Allman brace style, and tab indentation. Built for ESLint v10 flat config. Includes TypeScript support.",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:proctorio/eslint-config-proctorio.git"
+    },
+    "scripts": {
+        "test": "vitest run",
+        "test:coverage": "vitest run --coverage",
+        "test:watch": "vitest watch"
+    },
+    "author": "Proctorio",
+    "license": "Unlicense",
+    "peerDependencies": {
+        "eslint": ">=9.0.0",
+        "typescript-eslint": ">=8.0.0"
+    },
+    "peerDependenciesMeta": {
+        "typescript-eslint": {
+            "optional": true
+        }
+    },
+    "dependencies": {
+        "@eslint/js": "10.0.1",
+        "eslint-plugin-belgradian": "2.4.3",
+        "eslint-plugin-jsdoc": "62.7.0",
+        "eslint-plugin-unicorn": "63.0.0",
+        "globals": "16.4.0"
+    },
+    "devDependencies": {
+        "@vitest/coverage-v8": "4.0.18",
+        "eslint": "10.0.0",
+        "typescript": "5.9.3",
+        "typescript-eslint": "8.56.1",
+        "vitest": "4.0.18"
+    },
+    "keywords": [
+        "eslint",
+        "eslintconfig",
+        "eslint-config",
+        "config",
+        "proctorio",
+        "javascript",
+        "typescript",
+        "styleguide",
+        "jsdoc",
+        "closure",
+        "flat-config",
+        "eslint10",
+        "code-quality",
+        "linting"
+    ],
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "exports": {
+        ".": "./index.js",
+        "./typescript": "./typescript.js"
+    }
 }
