@@ -22,3 +22,5 @@ node_modules/
 # OS files
 .DS_Store
 Thumbs.db
+# Internal ADO<->GitHub sync config (must never be published)
+sync.yml
