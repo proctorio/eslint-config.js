@@ -23,7 +23,7 @@ function fetchData()
 {
 	fetch("/api/data")
 		.then(response => response.json())
-		.catch(error => console.error(error);
+		.catch(error => console.error(error));
 }`;
 
 			const errors = await getErrorsForRule(code, "promise/catch-or-return");
@@ -43,7 +43,7 @@ function fetchData()
 {
 	fetch("/api/data")
 		.then(response => response.json())
-		.finally(() => console.log("Done");
+		.finally(() => console.log("Done"));
 }`;
 
 			const errors = await getErrorsForRule(code, "promise/catch-or-return");
@@ -64,7 +64,7 @@ function fetchData()
 	fetch("/api/data")
 		.then(response => response.json())
 		.catch(error => console.error(error))
-		.finally(() => console.log("Done");
+		.finally(() => console.log("Done"));
 }`;
 
 			const errors = await getErrorsForRule(code, "promise/catch-or-return");
@@ -100,7 +100,7 @@ function fetchData()
 function fetchData()
 {
 	return fetch("/api/data")
-		.then(response => response.json();
+		.then(response => response.json());
 }`;
 
 			const errors = await getErrorsForRule(code, "promise/catch-or-return");
@@ -145,9 +145,9 @@ function processData()
 	return fetch("/api/data")
 		.then(response =>
 		{
-			return response.json(;
+			return response.json();
 		})
-		.catch(error => console.error(error);
+		.catch(error => console.error(error));
 }`;
 
 			const errors = await getErrorsForRule(code, "promise/always-return");
@@ -167,7 +167,7 @@ function processData()
 {
 	return fetch("/api/data")
 		.then(response => response.json())
-		.catch(error => console.error(error);
+		.catch(error => console.error(error));
 }`;
 
 			const errors = await getErrorsForRule(code, "promise/always-return");
@@ -189,7 +189,7 @@ function processData()
 		.then(response => response.json())
 		.then(data => data.toString())
 		.then(str => str.toUpperCase())
-		.catch(error => console.error(error);
+		.catch(error => console.error(error));
 }`;
 
 			const errors = await getErrorsForRule(code, "promise/always-return");
@@ -216,7 +216,9 @@ function createPromise()
 	});
 }`;
 
-		const errors = await getErrorsForRule(code, "promise/param-names");			expect(errors.length).toBeGreaterThan(0);
+		const errors = await getErrorsForRule(code, "promise/param-names");
+
+		expect(errors.length).toBeGreaterThan(0);
 		});
 
 		it("should allow standard resolve/reject names", async () =>
@@ -231,11 +233,11 @@ function createPromise()
 {
 	return new Promise((resolve, reject) =>
 	{
-		setTimeout(() => resolve(42), 1000;
+		setTimeout(() => resolve(42), 1000);
 	});
 }`;
 
-			const errors = await getErrorsForRule(code, "promise/catch-or-return");
+			const errors = await getErrorsForRule(code, "promise/param-names");
 
 			expect(errors).toHaveLength(0);
 		});
@@ -297,13 +299,13 @@ async function fetchData()
 {
 	try
 	{
-		const response = await fetch("/api/data";
+		const response = await fetch("/api/data");
 
-		return await response.json(;
+		return await response.json();
 	}
 	catch (error)
 	{
-		console.error(error;
+		console.error(error);
 
 		return null;
 	}
@@ -330,7 +332,7 @@ function fetchMultiple()
 		fetch("/api/data3")
 	])
 		.then(responses => Promise.all(responses.map(r => r.json())))
-		.catch(error => console.error(error);
+		.catch(error => console.error(error));
 }`;
 
 			const errors = await getErrorsForRule(code, "promise/catch-or-return");
@@ -353,7 +355,7 @@ function fetchWithTimeout()
 		new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000))
 	])
 		.then(response => response.json())
-		.catch(error => console.error(error);
+		.catch(error => console.error(error));
 }`;
 
 			const errors = await getErrorsForRule(code, "promise/catch-or-return");

@@ -97,7 +97,22 @@ export default [
 			"unicorn/filename-case": [
 				"error",
 				{
-					case: "pascalCase"
+					case: "pascalCase",
+
+					// This rule governs FILE names only. Our house style is
+					// PascalCase files living in conventionally lowercase
+					// directories (src/, test/, scripts/), which is the layout
+					// every consuming repo and every shared pipeline template
+					// uses - the templates lint a hardcoded `src/`.
+					//
+					// unicorn 74 added directory-name checking and defaulted it
+					// ON (`options.checkDirectories !== false`). unicorn 63 had
+					// no such option, so 63 -> 74 silently began rejecting every
+					// real repo with "Directory name `src` is not in pascal
+					// case. Rename it to `Src`", breaking every JS build in the
+					// org. Keeping it off preserves the semantics this config
+					// has always had. Do not remove without a fleet-wide plan.
+					checkDirectories: false
 				}
 			],
 			"unicorn/no-abusive-eslint-disable": "error",
@@ -437,7 +452,8 @@ export default [
 	{
 		files: ["**/test/mocks/*.mock.js"],
 		rules: {
-			"unicorn/filename-case": ["error", { case: "snakeCase" }],
+			// checkDirectories: see the base block - file names only.
+			"unicorn/filename-case": ["error", { case: "snakeCase", checkDirectories: false }],
 			"jsdoc/require-jsdoc": "off",
 			"no-negated-condition": "off",
 			"no-nested-ternary": "off"
@@ -448,18 +464,33 @@ export default [
 	{
 		files: ["**/src/scripts/*.js"],
 		rules: {
-			"unicorn/filename-case": ["error", { case: "kebabCase" }],
+			// checkDirectories: see the base block - file names only.
+			"unicorn/filename-case": ["error", { case: "kebabCase", checkDirectories: false }],
 			"jsdoc/require-jsdoc": "off",
 			"no-negated-condition": "off",
 			"no-nested-ternary": "off"
 		}
 	},
 
-	// Override for JSON files
+	// Override for JSON files.
+	//
+	// INERT unless the consumer supplies one: this config declares no JSON
+	// language (no @eslint/json), so ESLint cannot parse .json at all and the
+	// rule below never runs. The block is kept because it resolves correctly
+	// the moment a consumer adds a JSON language, and removing it would
+	// silently change the intended house style for JSON names. Tests assert
+	// the resolved options rather than linting a sample, since a sample would
+	// only ever produce a parse error - which is exactly how this went
+	// unnoticed.
+	//
+	// The glob is `**/*.json`, not `*.json`: in flat config a bare `*.json`
+	// matches only the repository root, so `src/data/foo.json` resolved to no
+	// rule at all. Same blind spot as linting test samples at the root.
 	{
-		files: ["*.json"],
+		files: ["**/*.json"],
 		rules: {
-			"unicorn/filename-case": ["error", { case: "kebabCase" }]
+			// checkDirectories: see the base block - file names only.
+			"unicorn/filename-case": ["error", { case: "kebabCase", checkDirectories: false }]
 		}
 	},
 

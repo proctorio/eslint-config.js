@@ -14,23 +14,63 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /**
- * Creates an ESLint instance with our configuration.
- *
- * @param {Object} [overrideConfig] - Optional config overrides for testing specific scenarios.
- * @returns {ESLint} Configured ESLint instance.
- */
-/**
  * Creates an ESLint instance with the config from index.js.
- * @returns {Object} ESLint instance configured with the project config.
+ *
+ * @param {Object} [overrideConfig] - Extra flat-config blocks appended after
+ * the project config, for tests that need to vary one setting.
+ * @returns {ESLint} ESLint instance configured with the project config.
  */
-function createLinter()
+function createLinter(overrideConfig)
 {
+	const extra = overrideConfig && Object.keys(overrideConfig).length > 0 ? [overrideConfig] : [];
 	const linter = new ESLint({
 		overrideConfigFile: true,
-		overrideConfig: config
+		overrideConfig: [...config, ...extra]
 	});
 
 	return linter;
+}
+
+/**
+ * Asserts that a lint result actually exercised the rules.
+ *
+ * Two results look identical to `expect(errors).toHaveLength(0)` but mean
+ * nothing: a sample that does not parse (a fatal message suppresses every
+ * rule) and a path excluded by the config's `ignores` (no rule runs at all).
+ * 24 tests in this suite were passing the first way, and one was passing the
+ * second way, before 2026-09-22 - including while the config was shipping the
+ * change that broke every build in the org. Fail loudly instead: a test that
+ * never ran the rule is a broken test, never a green one.
+ *
+ * @param {Object} result - The ESLint result object for a single file.
+ * @param {string} filename - The path the sample was linted as.
+ * @param {string} code - The sample, for the failure message.
+ * @returns {void}
+ */
+function assertRulesRan(result, filename, code)
+{
+	const fatal = result.messages.filter(message => message.fatal);
+
+	if (fatal.length > 0)
+	{
+		throw new Error(
+			`Sample for "${filename}" does not parse: ${fatal[0].message} (line ${fatal[0].line}).\n` +
+			"Rules never run on unparseable code, so this test would pass for the wrong reason.\n" +
+			`Code:\n${code}`
+		);
+	}
+
+	const ignored = result.messages.some(message => /File ignored/.test(message.message));
+
+	if (ignored)
+	{
+		throw new Error(
+			`Sample for "${filename}" was not linted: ${result.messages[0].message}\n` +
+			"The path matches an `ignores` entry in the config, so no rule ran and " +
+			"any assertion of \"no errors\" here is meaningless. Pick a path the " +
+			"config actually lints."
+		);
+	}
 }
 
 /**
@@ -46,7 +86,9 @@ async function lintCode(code, filename = "test.js", overrideConfig = {})
 	const eslint = createLinter(overrideConfig);
 	// Convert to absolute path if it's a relative path - needed for flat config overrides
 	const filePath = filename.startsWith("/") ? filename : join(process.cwd(), filename);
-	const results = await eslint.lintText(code, { filePath: filePath });
+	const results = await eslint.lintText(code, { filePath: filePath, warnIgnored: true });
+
+	assertRulesRan(results[0], filename, code);
 
 	return results[0].messages;
 }
@@ -133,6 +175,7 @@ async function getMessagesForRule(code, ruleId, filename = "test.js")
 }
 
 export {
+	assertRulesRan,
 	createLinter,
 	lintCode,
 	assertValid,

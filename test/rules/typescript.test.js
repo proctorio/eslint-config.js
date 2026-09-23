@@ -5,6 +5,7 @@
 import { describe, test, expect, beforeAll } from "vitest";
 import { ESLint } from "eslint";
 import { join } from "path";
+import { assertRulesRan } from "../helpers/lint-helper.js";
 
 describe("TypeScript Configuration", () =>
 {
@@ -29,7 +30,12 @@ describe("TypeScript Configuration", () =>
 				overrideConfig: typescriptConfig
 			});
 			const filePath = filename.startsWith("/") ? filename : join(process.cwd(), filename);
-			const results = await eslint.lintText(code, { filePath });
+			const results = await eslint.lintText(code, { filePath, warnIgnored: true });
+
+			// This file builds its own linter (it loads typescript.js, not
+			// index.js), so it has to opt into the same guard the shared
+			// helper applies - otherwise a parser regression here goes green.
+			assertRulesRan(results[0], filename, code);
 
 			return results[0].messages;
 		};

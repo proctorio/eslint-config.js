@@ -219,7 +219,7 @@ function test(value)
  */
 function createPerson(name, age)
 {
-	return { name, age });
+	return { name, age };
 }`;
 
 			const errors = await getErrorsForRule(code, "jsdoc/require-jsdoc");
@@ -387,9 +387,9 @@ class User
  */
 async function fetchUser(userId)
 {
-	const response = await fetch(\`/api/users/\${userId}\`;
+	const response = await fetch(\`/api/users/\${userId}\`);
 
-	return response.json(;
+	return response.json();
 }`;
 
 			const errors = await getErrorsForRule(code, "jsdoc/require-jsdoc");

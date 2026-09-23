@@ -4,9 +4,16 @@
  * PascalCase instead of the JavaScript-standard camelCase or kebab-case.
  * This also tests the overrides for test mocks (snake_case), scripts
  * (kebab-case), and JSON files (kebab-case).
+ *
+ * Every assertion lints at a realistic repository path - `src/MyModule.js`,
+ * not `MyModule.js`. Linting at the repo root leaves no directory segment for
+ * the rule to look at, which is how the 2026-09-17 breakage got past this
+ * suite: unicorn 74 began case-checking directory names by default and this
+ * file did not notice. See filename-case-directories.test.js.
  */
 
-import { lintCode } from "../helpers/lint-helper.js";
+import { createLinter, lintCode } from "../helpers/lint-helper.js";
+import { join } from "path";
 
 describe("Filename Case (PascalCase) - Unusual Rule", () =>
 {
@@ -21,7 +28,7 @@ describe("Filename Case (PascalCase) - Unusual Rule", () =>
 const value = 42;
 module.exports = value;`;
 
-			const messages = await lintCode(code, "MyModule.js");
+			const messages = await lintCode(code, "src/MyModule.js");
 			const filenameErrors = messages.filter(m => m.ruleId === "unicorn/filename-case");
 
 			expect(filenameErrors).toHaveLength(0);
@@ -45,7 +52,7 @@ class UserService
 }
 module.exports = UserService;`;
 
-			const messages = await lintCode(code, "UserServiceProvider.js");
+			const messages = await lintCode(code, "src/services/UserServiceProvider.js");
 			const filenameErrors = messages.filter(m => m.ruleId === "unicorn/filename-case");
 
 			expect(filenameErrors).toHaveLength(0);
@@ -63,10 +70,11 @@ module.exports = UserService;`;
 const value = 42;
 module.exports = value;`;
 
-			const messages = await lintCode(code, "myModule.js");
+			const messages = await lintCode(code, "src/myModule.js");
 			const filenameErrors = messages.filter(m => m.ruleId === "unicorn/filename-case");
 
 			expect(filenameErrors.length).toBeGreaterThan(0);
+			expect(filenameErrors[0].message).not.toContain("Directory name");
 		});
 
 		it("should reject kebab-case filenames", async () =>
@@ -78,10 +86,11 @@ module.exports = value;`;
 const value = 42;
 module.exports = value;`;
 
-			const messages = await lintCode(code, "my-module.js");
+			const messages = await lintCode(code, "src/my-module.js");
 			const filenameErrors = messages.filter(m => m.ruleId === "unicorn/filename-case");
 
 			expect(filenameErrors.length).toBeGreaterThan(0);
+			expect(filenameErrors[0].message).not.toContain("Directory name");
 		});
 
 		it("should reject snake_case filenames", async () =>
@@ -93,10 +102,11 @@ module.exports = value;`;
 const value = 42;
 module.exports = value;`;
 
-			const messages = await lintCode(code, "my_module.js");
+			const messages = await lintCode(code, "src/my_module.js");
 			const filenameErrors = messages.filter(m => m.ruleId === "unicorn/filename-case");
 
 			expect(filenameErrors.length).toBeGreaterThan(0);
+			expect(filenameErrors[0].message).not.toContain("Directory name");
 		});
 	});
 
@@ -108,7 +118,7 @@ module.exports = value;`;
 /**
  * Mock data.
  */
-const mockData = { id: 1, name: "test" });
+const mockData = { id: 1, name: "test" };
 module.exports = mockData;`;
 
 			const messages = await lintCode(code, "test/mocks/user_data.mock.js");
@@ -117,32 +127,34 @@ module.exports = mockData;`;
 			expect(filenameErrors).toHaveLength(0);
 		});
 
-		it.skip("should reject PascalCase for mock files", async () =>
+		it("should reject PascalCase for mock files", async () =>
 		{
 			const code = `
 /**
  * Mock data.
  */
-const mockData = { id: 1, name: "test" });
+const mockData = { id: 1, name: "test" };
 module.exports = mockData;`;
 
 			const messages = await lintCode(code, "test/mocks/UserData.mock.js");
 			const filenameErrors = messages.filter(m => m.ruleId === "unicorn/filename-case");
 
 			expect(filenameErrors.length).toBeGreaterThan(0);
+			expect(filenameErrors[0].message).toContain("snake case");
 		});
 	});
 
 	describe("Overrides - src/scripts/*.js (kebab-case)", () =>
 	{
+		// The shebang has to sit at offset 0 or it is a syntax error, which
+		// suppresses every rule and makes these tests pass for no reason.
 		it("should allow kebab-case for script files", async () =>
 		{
-			const code = `
-#!/usr/bin/env node
+			const code = `#!/usr/bin/env node
 /**
  * Build script.
  */
-console.log("Building...");`;
+globalThis.console.log("Building...");`;
 
 			const messages = await lintCode(code, "src/scripts/build-project.js");
 			const filenameErrors = messages.filter(m => m.ruleId === "unicorn/filename-case");
@@ -150,35 +162,35 @@ console.log("Building...");`;
 			expect(filenameErrors).toHaveLength(0);
 		});
 
-		it.skip("should reject PascalCase for script files", async () =>
+		it("should reject PascalCase for script files", async () =>
 		{
-			const code = `
-#!/usr/bin/env node
+			const code = `#!/usr/bin/env node
 /**
  * Build script.
  */
-console.log("Building...");`;
+globalThis.console.log("Building...");`;
 
 			const messages = await lintCode(code, "src/scripts/BuildProject.js");
 			const filenameErrors = messages.filter(m => m.ruleId === "unicorn/filename-case");
 
 			expect(filenameErrors.length).toBeGreaterThan(0);
+			expect(filenameErrors[0].message).toContain("kebab case");
 		});
 	});
 
 	describe("Overrides - *.json (kebab-case)", () =>
 	{
-		it("should allow kebab-case for JSON files", async () =>
+		// Asserted through the resolved config, not by linting: this config
+		// ships no JSON language, so a JSON sample only ever yields a parse
+		// error. See the note on the override in index.js.
+		it("should resolve kebab-case for JSON files", async () =>
 		{
-			const code = `{
-	"name": "test",
-	"version": "1.0.0"
-}`;
+			const linter = createLinter();
+			const resolved = await linter.calculateConfigForFile(join(process.cwd(), "package-lock.json"));
+			const [severity, options] = resolved.rules["unicorn/filename-case"];
 
-			const messages = await lintCode(code, "package-lock.json");
-			const filenameErrors = messages.filter(m => m.ruleId === "unicorn/filename-case");
-
-			expect(filenameErrors).toHaveLength(0);
+			expect(severity).toBe(2);
+			expect(options.case).toBe("kebabCase");
 		});
 	});
 
@@ -192,7 +204,7 @@ console.log("Building...");`;
  */
 module.exports = {};`;
 
-			const messages = await lintCode(code, "Index.js");
+			const messages = await lintCode(code, "src/Index.js");
 			const filenameErrors = messages.filter(m => m.ruleId === "unicorn/filename-case");
 
 			expect(filenameErrors).toHaveLength(0);
@@ -216,7 +228,7 @@ class HttpClient
 }
 module.exports = HttpClient;`;
 
-			const messages = await lintCode(code, "HttpClient.js");
+			const messages = await lintCode(code, "src/net/HttpClient.js");
 			const filenameErrors = messages.filter(m => m.ruleId === "unicorn/filename-case");
 
 			expect(filenameErrors).toHaveLength(0);

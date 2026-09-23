@@ -1,0 +1,108 @@
+# CI for the shared ESLint config itself.
+#
+# The build definition "eslint-config.js CI" (id 1069, project Open) has
+# pointed at this file since it was created and the file has never existed, so
+# the definition has never produced a single build. Nothing ran `npm test` on a
+# change to this repo. The only place the suite ran was inside
+# .github/workflows/publish.yml, which fires on a release tag - after the
+# decision to ship.
+#
+# That is the second half of the 2026-09-17 outage. eslint-plugin-unicorn
+# 63 -> 74 arrived as a dependabot bump, merged on the GitHub mirror, was
+# imported by sync.yml (skip_ci: false, so it auto-published), and reached
+# every JS build in the org without the test suite ever running in a position
+# where it could block. This pipeline is that position.
+#
+# Also intended as the build validation policy on main - see the note at the
+# bottom for why the trigger is shaped the way it is.
+
+trigger:
+  branches:
+    include:
+      - main
+
+# PR validation is driven by the branch policy, not by this block; ADO-hosted
+# repos ignore a `pr:` trigger. Declaring it anyway would be misleading.
+pr: none
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: Plumbing/core-templates
+
+stages:
+  - stage: Test
+    displayName: Test
+    variables:
+      - name: npm_config_cache
+        value: $(Pipeline.Workspace)/.npm
+    pool:
+      name: build-device-pool
+      demands:
+        - Agent.OS -equals Linux
+    jobs:
+      - job: test
+        displayName: 'vitest + coverage floor'
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          # package.json declares engines "^22.22.2 || >=24.15.0" - the floor
+          # the pinned plugins actually need (eslint-plugin-jsdoc 64.3.9).
+          # The Linux agents ship Node 20.20.2, on which eslint-plugin-unicorn
+          # dies at import time, so reuse the Node the agent already bundles
+          # for its task host rather than downloading one. Same step the JS PR
+          # templates use; it fails the build outright if nothing suitable is
+          # present, which is the honest signal.
+          - template: PR/js/_steps/use-node-lint.yml@templates
+
+          - task: Cache@2
+            displayName: 'Cache npm'
+            inputs:
+              key: 'npm | "$(Agent.OS)" | $(Build.SourcesDirectory)/package.json'
+              restoreKeys: |
+                npm | "$(Agent.OS)"
+              path: $(npm_config_cache)
+
+          # Full install: the test stack lives in devDependencies. No
+          # package-lock.json is committed (it is in .gitignore), so this
+          # resolves fresh - which is deliberate here. A dependency bump that
+          # changes rule behaviour has to show up as a failing test, and it
+          # only can if CI installs what the bump actually resolves to.
+          - task: Npm@1
+            displayName: 'npm install'
+            inputs:
+              command: custom
+              customCommand: 'install --no-audit --no-fund --no-progress --cache $(npm_config_cache)'
+              customRegistry: useFeed
+              customFeed: 'bf9531bb-8f79-47f5-90ed-5018e42bca47/825750ba-9f0e-46dc-b7fa-112e16cb0b36'
+
+          # vitest.config.js enforces the 80% coverage floor and writes both
+          # test-results.xml and coverage/cobertura-coverage.xml.
+          - task: Npm@1
+            displayName: 'npm run test:coverage'
+            inputs:
+              command: custom
+              customCommand: 'run test:coverage'
+              customRegistry: useFeed
+              customFeed: 'bf9531bb-8f79-47f5-90ed-5018e42bca47/825750ba-9f0e-46dc-b7fa-112e16cb0b36'
+
+          # condition: always so a failing suite still publishes its results -
+          # otherwise a red build shows an exit code and nothing else.
+          - task: PublishTestResults@2
+            displayName: 'Publish test results'
+            condition: always()
+            inputs:
+              testResultsFormat: JUnit
+              testResultsFiles: 'test-results.xml'
+              searchFolder: '$(Build.SourcesDirectory)'
+              testRunTitle: 'eslint-config vitest'
+              failTaskOnFailedTests: true
+
+          - task: PublishCodeCoverageResults@2
+            displayName: 'Publish coverage'
+            condition: always()
+            inputs:
+              summaryFileLocation: '$(Build.SourcesDirectory)/coverage/cobertura-coverage.xml'
+              pathToSources: '$(Build.SourcesDirectory)'

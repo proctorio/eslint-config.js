@@ -4,7 +4,8 @@
  * test mocks, scripts, JSON files, and test files.
  */
 
-import { lintCode, getErrorsForRule } from "../helpers/lint-helper.js";
+import { createLinter, lintCode, getErrorsForRule } from "../helpers/lint-helper.js";
+import { join } from "path";
 
 describe("Config Overrides", () =>
 {
@@ -17,7 +18,7 @@ const mockData = {
 	id: 1,
 	name: "Test User",
 	email: "test@example.com"
-});
+};
 
 module.exports = mockData;`;
 
@@ -30,7 +31,7 @@ module.exports = mockData;`;
 		it("should allow snake_case filenames for mocks", async () =>
 		{
 			const code = `
-const mockData = { value: 42 });
+const mockData = { value: 42 };
 module.exports = mockData;`;
 
 			const messages = await lintCode(code, "test/mocks/test_mock_data.mock.js");
@@ -45,7 +46,7 @@ module.exports = mockData;`;
 const value = 42;
 if (!condition)
 {
-	doSomething(;
+	doSomething();
 }
 module.exports = value;`;
 
@@ -72,13 +73,12 @@ module.exports = { status };`;
 	{
 		it("should not require JSDoc for script files", async () =>
 		{
-			const code = `
-#!/usr/bin/env node
-const fs = require("fs";
+			const code = `#!/usr/bin/env node
+const fs = require("fs");
 
 function build()
 {
-	fs.writeFileSync("output.txt", "Built!";
+	fs.writeFileSync("output.txt", "Built!");
 }
 
 build();`;
@@ -91,8 +91,7 @@ build();`;
 
 		it("should allow kebab-case filenames for scripts", async () =>
 		{
-			const code = `
-#!/usr/bin/env node
+			const code = `#!/usr/bin/env node
 console.log("Running...");`;
 
 			const messages = await lintCode(code, "src/scripts/run-tests.js");
@@ -103,12 +102,11 @@ console.log("Running...");`;
 
 		it("should allow no-negated-condition in scripts", async () =>
 		{
-			const code = `
-#!/usr/bin/env node
+			const code = `#!/usr/bin/env node
 if (!process.env.NODE_ENV)
 {
-	console.error("NODE_ENV not set";
-	process.exit(1;
+	console.error("NODE_ENV not set");
+	process.exit(1);
 }`;
 
 			const messages = await lintCode(code, "src/scripts/check-env.js");
@@ -120,17 +118,21 @@ if (!process.env.NODE_ENV)
 
 	describe("*.json - JSON file rules", () =>
 	{
-		it("should allow kebab-case for JSON files", async () =>
+		// This override cannot be exercised by linting a sample: the config
+		// declares no JSON language, so ESLint fails to parse .json and every
+		// rule is suppressed. The previous version of this test linted a JSON
+		// literal and asserted "no filename errors", which passed for that
+		// reason alone and would have passed just as happily with the override
+		// deleted. Assert the resolved options instead.
+		it("should resolve kebab-case for JSON files", async () =>
 		{
-			const code = `{
-	"name": "test-package",
-	"version": "1.0.0"
-}`;
+			const linter = createLinter();
+			const resolved = await linter.calculateConfigForFile(join(process.cwd(), "test-config.json"));
+			const [severity, options] = resolved.rules["unicorn/filename-case"];
 
-			const messages = await lintCode(code, "test-config.json");
-			const filenameErrors = messages.filter(m => m.ruleId === "unicorn/filename-case");
-
-			expect(filenameErrors).toHaveLength(0);
+			expect(severity).toBe(2);
+			expect(options.case).toBe("kebabCase");
+			expect(options.checkDirectories).toBe(false);
 		});
 	});
 
@@ -156,7 +158,7 @@ describe("MyModule", function()
 		it("should allow unused 'should' and 'expect' variables", async () =>
 		{
 			const code = `
-const should = require("chai").should(;
+const should = require("chai").should();
 const expect = require("chai").expect;
 
 describe("MyModule", function()
@@ -164,7 +166,7 @@ describe("MyModule", function()
 	it("should do something", function()
 	{
 		const value = 42;
-		value.should.equal(42;
+		value.should.equal(42);
 	});
 });`;
 

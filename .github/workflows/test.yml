@@ -1,0 +1,37 @@
+name: test
+
+# Canonical source of this workflow is the ADO Open repo; sync mirrors it to GitHub.
+#
+# This is the gate on dependency bumps. dependabot raises its weekly grouped
+# bumps here, and sync.yml imports GitHub-side merges with skip_ci: false, so a
+# merge on this side auto-publishes to npmjs. Until this file existed, nothing
+# ran the test suite before that happened - publish.yml runs it, but only on a
+# release tag, which is after the decision to ship.
+#
+# That gap is how eslint-plugin-unicorn 63 -> 74 reached every JS build in the
+# org on 2026-09-17.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Matches engines.node. Not a floating major: the whole point is to
+          # run the suite on a runtime the package actually supports.
+          node-version: 24
+      # No package-lock.json is committed, so this resolves fresh - which is
+      # deliberate. A bump that changes rule behaviour has to surface as a
+      # failing test, and it only can if CI installs what the bump resolves to.
+      - run: npm install --no-audit --no-fund
+      - run: npm run test:coverage

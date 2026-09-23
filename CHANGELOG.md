@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- `ci.yml`, the pipeline the build definition `eslint-config.js CI` has pointed
+  at since it was created without the file ever existing — so it had never
+  produced a single build. Nothing ran the test suite on a change to this repo;
+  it ran only inside `.github/workflows/publish.yml`, on a release tag, which is
+  after the decision to ship. That is how the unicorn 63 → 74 bump reached the
+  fleet. Now wired as a blocking build validation policy on `main`.
+- `.github/workflows/test.yml`, which gates pull requests on the GitHub mirror.
+  That is where dependabot raises its bumps, and `sync.yml` imports GitHub-side
+  merges with `skip_ci: false`, so a merge there publishes to npm on its own.
+- JUnit and Cobertura output from `vitest.config.js`, so both pipelines report
+  per-test detail instead of a bare exit code.
+
+### Fixed
+- `unicorn/filename-case` now sets `checkDirectories: false` on all four of its
+  configurations. eslint-plugin-unicorn 74 added directory-name checking and
+  defaulted it on, so from 4.0.17 every consuming repo failed with
+  ``Directory name `src` is not in pascal case. Rename it to `Src` `` — the house
+  style is PascalCase *files* in conventionally lowercase *directories*, and the
+  shared pipeline templates lint a hardcoded `src/`. This restores the semantics
+  the config has always had; it was never a deliberate change.
+- `engines.node` corrected from `>=18.0.0` to `^22.22.2 || >=24.15.0`. The
+  declared range was three majors below what the pinned plugins actually
+  require (eslint-plugin-jsdoc 64.3.9 needs `^22.22.2 || >=24.15.0`), so Node 20
+  build agents installed the package and only failed later, at config load.
+- The `*.json` override glob is now `**/*.json`. In flat config a bare `*.json`
+  matches only the repository root, so nested JSON resolved to no rule at all.
+  Note this override remains inert until a consumer supplies a JSON language;
+  the package ships none.
+
+### Changed
+- Test suite no longer reports false greens. 24 tests were linting code samples
+  containing syntax errors: a parse error suppresses every rule message, so
+  `expect(errors).toHaveLength(0)` passed regardless of what the config did. One
+  further test linted a path inside the global `ignores`. All samples repaired,
+  and `lintCode` now throws when a sample fails to parse or when the path is
+  ignored, rather than returning an empty message list.
+- `unicorn/filename-case` tests lint at realistic nested paths (`src/MyModule.js`)
+  instead of the repository root (`MyModule.js`). Linting at the root left no
+  directory segment to check, which is why the suite reported 133 passed on the
+  exact version that broke every JS build in the org.
+- Added `test/rules/filename-case-directories.test.js`, which asserts both the
+  behaviour and the resolved rule options, so a future plugin bump that flips a
+  default fails here with an obvious cause.
+- Two `it.skip` tests re-enabled; they had been skipped because their samples
+  never parsed.
+- `createLinter` now honours its `overrideConfig` argument, which it previously
+  accepted and discarded.
+
 ## [4.0.0] - 2026-02-21
 
 ### Changed

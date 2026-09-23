@@ -55,7 +55,7 @@
 		"linting"
 	],
 	"engines": {
-		"node": ">=18.0.0"
+		"node": "^22.22.2 || >=24.15.0"
 	},
 	"exports": {
 		".": "./index.js",
