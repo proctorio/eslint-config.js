@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- JSON files are no longer linted. 4.0.19 changed the JSON override's glob from
+  `*.json` to `**/*.json` on the premise that the block was inert without a
+  JSON language. It was not: a config object that matches a file makes ESLint
+  lint it, and with no JSON language the default JavaScript parser ran on every
+  `src/**/*.json` in every consumer - `Parsing error: Unexpected token :` at
+  line 2 of locales, manifests and `serve.json` (proctorio.com 178800,
+  proctoriox.com 178801, herald 178785). The override is removed: this config
+  declares no JSON language, so it must not match JSON at all, which is what
+  4.0.14 did in effect (the bare `*.json` matched only the repository root,
+  and consumers lint `src/`). The test now lints a real tree with a JSON file
+  in it instead of asserting resolved options.
+- `peerDependencies.eslint` is now `^10.4.0` instead of an exact version. It had
+  been exact for the whole life of the package (9.37.0, 10.0.0, then 10.10.0 via
+  the same grouped bump that brought unicorn 74). Consumers pin their own eslint
+  and the shared PR pipeline installs this config into their tree, so an exact
+  peer made `npm install` fail with ERESOLVE for every consumer not on precisely
+  that version (Independent/mosaic.js, eslint 10.0.0, build 178689, 2026-09-27).
+  The floor is 10.4.0, not 10.0.0, because eslint-plugin-unicorn 74 declares
+  `eslint >=10.4` and npm resolves the bundled plugins' peers as well as ours.
+- `peerDependencies.typescript-eslint` is now `>=8.56.0`. 8.56.0 is the first
+  release whose own eslint peer admits ESLint 10; the old `>=8.0.0` accepted
+  versions that could never install next to this config.
+
+- The published tarball is now whitelisted (`files`): `index.js`, `typescript.js`,
+  `rules/`, `SECURITY.md`, `security.txt` plus the files npm always includes.
+  4.0.19 shipped `test-results.xml` (the junit output of its own test run),
+  `ci.yml`, `vitest.config.js` and `scripts/` to npm, because the reporter added
+  for CI writes into the package root and nothing restricted the pack.
+
+### Changed
+- Added `test/package-shape.test.js`: the eslint peer must be a caret range on
+  one major, a subset of every bundled plugin's own eslint peer range, and
+  satisfied by the eslint the suite runs on; every bundled plugin must be pinned
+  exactly and match what is installed. A grouped dependency bump can no longer
+  tighten the peer, or bump a plugin past the peer, without a red test.
+- `semver` added as a dev dependency for that test.
+
+## [4.0.19] - 2026-09-23
+
 ### Added
 - `ci.yml`, the pipeline the build definition `eslint-config.js CI` has pointed
   at since it was created without the file ever existing — so it had never
@@ -140,6 +180,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated to support ES2020 syntax
 
+[4.0.19]: https://dev.azure.com/echovoice/Open/_git/eslint-config.js/branchCompare?baseVersion=GT4.0.0&targetVersion=GT4.0.19
 [4.0.0]: https://dev.azure.com/echovoice/Open/_git/eslint-config.js/branchCompare?baseVersion=GT3.3.0&targetVersion=GT4.0.0
 [3.3.0]: https://dev.azure.com/echovoice/Open/_git/eslint-config.js/branchCompare?baseVersion=GT3.2.0&targetVersion=GT3.3.0
 [3.2.0]: https://dev.azure.com/echovoice/Open/_git/eslint-config.js/branchCompare?baseVersion=GT3.1.0&targetVersion=GT3.2.0

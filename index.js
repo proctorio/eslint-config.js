@@ -472,28 +472,6 @@ export default [
 		}
 	},
 
-	// Override for JSON files.
-	//
-	// INERT unless the consumer supplies one: this config declares no JSON
-	// language (no @eslint/json), so ESLint cannot parse .json at all and the
-	// rule below never runs. The block is kept because it resolves correctly
-	// the moment a consumer adds a JSON language, and removing it would
-	// silently change the intended house style for JSON names. Tests assert
-	// the resolved options rather than linting a sample, since a sample would
-	// only ever produce a parse error - which is exactly how this went
-	// unnoticed.
-	//
-	// The glob is `**/*.json`, not `*.json`: in flat config a bare `*.json`
-	// matches only the repository root, so `src/data/foo.json` resolved to no
-	// rule at all. Same blind spot as linting test samples at the root.
-	{
-		files: ["**/*.json"],
-		rules: {
-			// checkDirectories: see the base block - file names only.
-			"unicorn/filename-case": ["error", { case: "kebabCase", checkDirectories: false }]
-		}
-	},
-
 	// Override for test files
 	{
 		files: ["test/*.Test.js", "test/**/*.test.js"],

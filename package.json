@@ -2,6 +2,13 @@
 	"name": "@proctorio/eslint-config",
 	"version": "4.0.0",
 	"type": "module",
+	"files": [
+		"index.js",
+		"typescript.js",
+		"rules/",
+		"SECURITY.md",
+		"security.txt"
+	],
 	"description": "Proctorio's opinionated ESLint configuration with strict JSDoc, Allman brace style, and tab indentation. Built for ESLint v10 flat config. Includes TypeScript support.",
 	"main": "index.js",
 	"repository": {
@@ -16,8 +23,8 @@
 	"author": "Proctorio",
 	"license": "Unlicense",
 	"peerDependencies": {
-		"eslint": "10.10.0",
-		"typescript-eslint": ">=8.0.0"
+		"eslint": "^10.4.0",
+		"typescript-eslint": ">=8.56.0"
 	},
 	"peerDependenciesMeta": {
 		"typescript-eslint": {
@@ -34,6 +41,7 @@
 	"devDependencies": {
 		"@vitest/coverage-v8": "4.1.11",
 		"eslint": "10.10.0",
+		"semver": "7.8.5",
 		"typescript": "5.9.3",
 		"typescript-eslint": "8.70.0",
 		"vitest": "4.1.11"

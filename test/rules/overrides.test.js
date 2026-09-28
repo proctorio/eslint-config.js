@@ -5,7 +5,11 @@
  */
 
 import { createLinter, lintCode, getErrorsForRule } from "../helpers/lint-helper.js";
-import { join } from "path";
+import { join, relative } from "path";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "fs";
+import { tmpdir } from "os";
+import { ESLint } from "eslint";
+import config from "../../index.js";
 
 describe("Config Overrides", () =>
 {
@@ -116,23 +120,41 @@ if (!process.env.NODE_ENV)
 		});
 	});
 
-	describe("*.json - JSON file rules", () =>
+	describe("*.json - JSON files are not linted", () =>
 	{
-		// This override cannot be exercised by linting a sample: the config
-		// declares no JSON language, so ESLint fails to parse .json and every
-		// rule is suppressed. The previous version of this test linted a JSON
-		// literal and asserted "no filename errors", which passed for that
-		// reason alone and would have passed just as happily with the override
-		// deleted. Assert the resolved options instead.
-		it("should resolve kebab-case for JSON files", async () =>
+		// 4.0.19 gave the JSON override the glob `**/*.json` on the premise that
+		// the block was inert without a JSON language. It was not: a config
+		// object that matches a file makes ESLint lint it, and with no JSON
+		// language the default JavaScript parser ran on every src/**/*.json in
+		// every consumer - `Parsing error: Unexpected token :` at line 2
+		// (proctorio.com 178800, proctoriox.com 178801, herald 178785: locales,
+		// manifests, serve.json). This config declares no JSON language, so it
+		// must not match JSON files at all. Lint a real tree, not a sample.
+		it("does not lint JSON under src/ when a directory is passed", async () =>
+		{
+			const dir = mkdtempSync(join(tmpdir(), "eslint-config-json-"));
+			try
+			{
+				mkdirSync(join(dir, "src", "data"), { recursive: true });
+				writeFileSync(join(dir, "src", "data", "Thing.json"), "{\n\t\"name\": \"thing\"\n}\n");
+				writeFileSync(join(dir, "src", "Thing.js"), "export const Thing = 1;\n");
+				const linter = new ESLint({ cwd: dir, overrideConfigFile: true, overrideConfig: config });
+				const results = await linter.lintFiles(["src/"]);
+
+				expect(results.map(r => relative(dir, r.filePath))).toEqual([join("src", "Thing.js")]);
+				expect(results[0].messages).toHaveLength(0);
+			}
+			finally
+			{
+				rmSync(dir, { recursive: true, force: true });
+			}
+		});
+
+		it("resolves no configuration for a JSON path", async () =>
 		{
 			const linter = createLinter();
-			const resolved = await linter.calculateConfigForFile(join(process.cwd(), "test-config.json"));
-			const [severity, options] = resolved.rules["unicorn/filename-case"];
 
-			expect(severity).toBe(2);
-			expect(options.case).toBe("kebabCase");
-			expect(options.checkDirectories).toBe(false);
+			await expect(linter.calculateConfigForFile(join(process.cwd(), "src", "data", "Thing.json"))).resolves.toBeUndefined();
 		});
 	});
 

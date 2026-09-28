@@ -21,7 +21,7 @@ npm install --save-dev @proctorio/eslint-config eslint
 npm install --save-dev @proctorio/eslint-config eslint typescript-eslint
 ```
 
-Plugin dependencies (JSDoc, Unicorn, Belgradian, etc.) are bundled. `eslint` is a required peer dependency (exact version `10.0.0`). `typescript-eslint` is an optional peer dependency, only needed for TypeScript projects.
+Plugin dependencies (JSDoc, Unicorn, Belgradian, etc.) are bundled. `eslint` is a required peer dependency (`^10.4.0`). `typescript-eslint` is an optional peer dependency (`>=8.56.0`), only needed for TypeScript projects.
 
 Promise rules and the no-eslint-disable rule are inlined from their original packages to eliminate dependency conflicts.
 
@@ -218,9 +218,6 @@ These rules are less common and may surprise developers adopting this config:
 - JSDoc not required
 - `no-negated-condition` and `no-nested-ternary` disabled
 
-### JSON Files (`*.json`)
-- Filename case: kebab-case
-
 ### Test Files (`test/*.Test.js`, `test/**/*.test.js`)
 - JSDoc not required
 - `should` and `expect` ignored for unused variable checks
@@ -279,7 +276,7 @@ npm run test:watch    # Run tests in watch mode
 ## Requirements
 
 - **Node.js:** >= 18.0.0
-- **ESLint:** 10.0.0 (exact — pinned peer dependency)
+- **ESLint:** ^10.4.0 (peer dependency)
 - **Package Type:** ESM
 
 ## License

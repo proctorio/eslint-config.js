@@ -178,19 +178,16 @@ globalThis.console.log("Building...");`;
 		});
 	});
 
-	describe("Overrides - *.json (kebab-case)", () =>
+	describe("Overrides - *.json (not linted)", () =>
 	{
-		// Asserted through the resolved config, not by linting: this config
-		// ships no JSON language, so a JSON sample only ever yields a parse
-		// error. See the note on the override in index.js.
-		it("should resolve kebab-case for JSON files", async () =>
+		// The JSON override was removed in 4.0.20: this config declares no JSON
+		// language, so a block matching **/*.json made ESLint parse JSON as
+		// JavaScript (4.0.19 regression). A JSON path resolves to no config.
+		it("resolves no configuration for a JSON file", async () =>
 		{
 			const linter = createLinter();
-			const resolved = await linter.calculateConfigForFile(join(process.cwd(), "package-lock.json"));
-			const [severity, options] = resolved.rules["unicorn/filename-case"];
 
-			expect(severity).toBe(2);
-			expect(options.case).toBe("kebabCase");
+			await expect(linter.calculateConfigForFile(join(process.cwd(), "src", "data", "Thing.json"))).resolves.toBeUndefined();
 		});
 	});
 
