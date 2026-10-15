@@ -19,7 +19,6 @@ export default [
 			"**/build/**",
 			"**/lib/**",
 			"**/rollup.config.*.js",
-			"**/src/_data/eleventyComputed.js",
 			"**/external/**"
 		]
 	},

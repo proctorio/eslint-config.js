@@ -230,7 +230,6 @@ These rules are less common and may surprise developers adopting this config:
 - `**/build/**`
 - `**/lib/**`
 - `**/rollup.config.*.js`
-- `**/src/_data/eleventyComputed.js`
 - `**/external/**`
 
 ## Globals
