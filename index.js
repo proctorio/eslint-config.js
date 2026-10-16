@@ -486,5 +486,13 @@ export default [
 			"unicorn/prefer-add-event-listener": "off",
 			"jsdoc/require-jsdoc": "off"
 		}
-	}
+	},
+
+    //Override for Eleventy computed files
+    {
+        files: ["**/src/_data/eleventyComputed.js"],
+        rules:{
+            "unicorn/filename-case":"off",
+        }
+    }
 ];

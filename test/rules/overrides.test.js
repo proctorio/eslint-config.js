@@ -261,4 +261,46 @@ function test()
 			expect(filenameErrors.length).toBeGreaterThan(0);
 		});
 	});
+
+	describe("Eleventy computed file override", () =>{
+		it("should allow eleventyComputed.js wihtout filename errors", async () =>{
+			const code = "const Example = 42;";
+			const messages = await lintCode(
+				code,
+				"src/_data/eleventyComputed.js"
+			);
+			const filenameErrors = messages.filter(
+				(m) => m.ruleId === "unicorn/filename-case"
+			);
+			expect(filenameErrors).toHaveLength(0);
+		});
+
+		it("should still enforce PascalCase for other files", async () =>{
+			const code = "const Example = 42;";
+
+			const messages = await lintCode(
+				code,
+				"src/__data/incorrectName.js"
+			);
+
+			const filenameErrors = messages.filter(
+				(m) => m.ruleId === "unicorn/filename-case"
+			);
+			expect(filenameErrors.length).toBeGreaterThan(0);
+		});
+
+		it("should still lint other rules for Eleventy computed file", async () => {
+			const code = "const unusedVariable = 42;";
+		
+			const messages = await lintCode(
+				code,
+				"src/_data/eleventyComputed.js"
+			);
+
+			const unusedErrors = messages.filter((m) => m.ruleId === "no-unused-vars");
+
+		    expect(unusedErrors.length).toBeGreaterThan(0);
+
+		});
+	})
 });
