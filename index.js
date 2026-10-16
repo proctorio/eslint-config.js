@@ -488,11 +488,11 @@ export default [
 		}
 	},
 
-    //Override for Eleventy computed files
-    {
-        files: ["**/src/_data/eleventyComputed.js"],
-        rules:{
-            "unicorn/filename-case":"off",
-        }
-    }
+	// Override for Eleventy computed files
+	{
+		files: ["**/src/_data/eleventyComputed.js"],
+		rules: {
+			"unicorn/filename-case":"off",
+		}
+	}
 ];

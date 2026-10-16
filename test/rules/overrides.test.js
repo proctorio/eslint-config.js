@@ -263,7 +263,7 @@ function test()
 	});
 
 	describe("Eleventy computed file override", () =>{
-		it("should allow eleventyComputed.js wihtout filename errors", async () =>{
+		it("should allow eleventyComputed.js without filename errors", async () =>{
 			const code = "const Example = 42;";
 			const messages = await lintCode(
 				code,
