@@ -492,7 +492,7 @@ export default [
 	{
 		files: ["**/src/_data/eleventyComputed.js"],
 		rules: {
-			"unicorn/filename-case":"off",
+			"unicorn/filename-case": "off"
 		}
 	}
 ];
