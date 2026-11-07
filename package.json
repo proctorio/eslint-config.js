@@ -33,18 +33,18 @@
 	},
 	"dependencies": {
 		"@eslint/js": "10.0.1",
-		"eslint-plugin-belgradian": "2.4.3",
-		"eslint-plugin-jsdoc": "64.3.9",
-		"eslint-plugin-unicorn": "74.0.0",
-		"globals": "17.12.0"
+		"eslint-plugin-belgradian": "2.4.6",
+		"eslint-plugin-jsdoc": "65.4.3",
+		"eslint-plugin-unicorn": "79.0.0",
+		"globals": "17.14.0"
 	},
 	"devDependencies": {
-		"@vitest/coverage-v8": "4.1.11",
-		"eslint": "10.10.0",
-		"semver": "7.8.5",
-		"typescript": "5.9.3",
-		"typescript-eslint": "8.70.0",
-		"vitest": "4.1.11"
+		"@vitest/coverage-v8": "5.1.0",
+		"eslint": "10.14.0",
+		"semver": "7.8.6",
+		"typescript": "7.0.2",
+		"typescript-eslint": "8.72.1",
+		"vitest": "5.1.0"
 	},
 	"keywords": [
 		"eslint",
