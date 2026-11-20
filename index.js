@@ -19,7 +19,6 @@ export default [
 			"**/build/**",
 			"**/lib/**",
 			"**/rollup.config.*.js",
-			"**/src/_data/eleventyComputed.js",
 			"**/external/**"
 		]
 	},
@@ -486,6 +485,14 @@ export default [
 			complexity: "off",
 			"unicorn/prefer-add-event-listener": "off",
 			"jsdoc/require-jsdoc": "off"
+		}
+	},
+
+	// Override for Eleventy computed files
+	{
+		files: ["**/src/_data/eleventyComputed.js"],
+		rules: {
+			"unicorn/filename-case": "off"
 		}
 	}
 ];
